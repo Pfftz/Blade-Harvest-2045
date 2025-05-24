@@ -10,6 +10,8 @@ public class Slots_UI : MonoBehaviour
     public TextMeshProUGUI quantityText;
     public Button removeButton; // Add this reference
 
+    [SerializeField] private GameObject highlight;
+
     private int slotID;
     private Inventory_UI inventoryUI;
 
@@ -17,7 +19,7 @@ public class Slots_UI : MonoBehaviour
     {
         slotID = id;
         inventoryUI = invUI;
-        
+
         if (removeButton != null)
         {
             removeButton.onClick.RemoveAllListeners();
@@ -26,11 +28,15 @@ public class Slots_UI : MonoBehaviour
     }
     public void SetItem(Inventory.Slot slot)
     {
-        if (slot != null)
+        if (slot != null && slot.icon != null) // Add icon null check
         {
             itemIcon.sprite = slot.icon;
-            itemIcon.color = new Color(1, 1, 1, 1); // Set icon color to white (fully visible)}
+            itemIcon.color = new Color(1, 1, 1, 1);
             quantityText.text = slot.count.ToString();
+        }
+        else
+        {
+            setEmpty(); // Fallback to empty if icon is null
         }
     }
     public void setEmpty()
@@ -38,5 +44,10 @@ public class Slots_UI : MonoBehaviour
         itemIcon.sprite = null;
         itemIcon.color = new Color(1, 1, 1, 0); // Set icon color to transparent
         quantityText.text = "";
+    }
+
+    public void SetHighlight(bool isOn)
+    {
+        highlight.SetActive(isOn);
     }
 }

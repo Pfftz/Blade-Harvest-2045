@@ -6,9 +6,7 @@ using UnityEngine.Tilemaps;
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
-    public Player player;
     public ItemManager itemManager;
-    public Inventory_UI inventoryUI;
     public TileManager tileManager;
 
     private void Awake()
