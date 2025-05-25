@@ -8,7 +8,7 @@ public class Player : MonoBehaviour
 
     private void Awake()
     {
-        inventory = new Inventory(21);
+        inventory = new Inventory(27);
     }
     private void Update()
     {
@@ -31,5 +31,12 @@ public class Player : MonoBehaviour
         Item droppedItem = Instantiate(item, spawnLocation + spawnOffset, Quaternion.identity);
 
         droppedItem.rb.AddForce(spawnOffset * .2f, ForceMode2D.Impulse);
+    }
+    public void DropItem(Item item, int numToDrop)
+    {
+        for(int i = 0; i < numToDrop; i++)
+        {
+            DropItem(item);
+        }
     }
 }
