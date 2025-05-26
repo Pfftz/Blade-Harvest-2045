@@ -17,7 +17,7 @@ public class Inventory_UI : MonoBehaviour
 
     void Start()
     {
-        inventory = GameManager.instance.player.inventory.GetInventoryByName(inventoryName);
+        inventory = GameManager.instance.player.inventoryManager.GetInventoryByName(inventoryName);
         SetupSlots();
         Refresh();
     }
@@ -55,27 +55,71 @@ public class Inventory_UI : MonoBehaviour
             Debug.LogError("Slots UI count does not match player's inventory slots count.");
         }
     }
+    public void SlotDrop(Slots_UI slot)
+    {
+        // Add null checks
+        if (UI_Manager.draggedSlot == null || slot == null)
+        {
+            Debug.LogWarning("Dragged slot or target slot is null");
+            return;
+        }
+
+        if (UI_Manager.dragSingle)
+        {
+            UI_Manager.draggedSlot.inventory.MoveSlot(UI_Manager.draggedSlot.slotID, slot.slotID, slot.inventory);
+        }
+        else
+        {
+            UI_Manager.draggedSlot.inventory.MoveSlot(UI_Manager.draggedSlot.slotID, slot.slotID, slot.inventory, UI_Manager.draggedSlot.inventory.slots[UI_Manager.draggedSlot.slotID].count);
+        }
+        GameManager.instance.uiManager.RefreshAll();
+    }
     public void Remove()
     {
+        // Add comprehensive null checks
+        if (UI_Manager.draggedSlot == null)
+        {
+            Debug.LogWarning("No dragged slot to remove");
+            return;
+        }
+
+        // Use the dragged slot's inventory instead of this UI's inventory
+        Inventory sourceInventory = UI_Manager.draggedSlot.inventory;
+        
+        if (sourceInventory == null || sourceInventory.slots == null)
+        {
+            Debug.LogError("Source inventory or slots is null");
+            return;
+        }
+
+        if (UI_Manager.draggedSlot.slotID >= sourceInventory.slots.Count)
+        {
+            Debug.LogError("Slot ID out of range");
+            return;
+        }
+
         // Add null check for empty slots
-        if (string.IsNullOrEmpty(inventory.slots[UI_Manager.draggedSlot.slotID].itemName))
+        if (string.IsNullOrEmpty(sourceInventory.slots[UI_Manager.draggedSlot.slotID].itemName))
         {
             return; // Don't try to drop empty slots
         }
-        Item itemToDrop = GameManager.instance.itemManager.GetItemByName(inventory.slots[UI_Manager.draggedSlot.slotID].itemName);
+
+        Item itemToDrop = GameManager.instance.itemManager.GetItemByName(sourceInventory.slots[UI_Manager.draggedSlot.slotID].itemName);
         if (itemToDrop != null)
         {
             if (UI_Manager.dragSingle)
             {
                 GameManager.instance.player.DropItem(itemToDrop);
-                inventory.Remove(UI_Manager.draggedSlot.slotID);
+                sourceInventory.Remove(UI_Manager.draggedSlot.slotID);
             }
             else
             {
-                GameManager.instance.player.DropItem(itemToDrop, inventory.slots[UI_Manager.draggedSlot.slotID].count);
-                inventory.Remove(UI_Manager.draggedSlot.slotID, inventory.slots[UI_Manager.draggedSlot.slotID].count);
+                GameManager.instance.player.DropItem(itemToDrop, sourceInventory.slots[UI_Manager.draggedSlot.slotID].count);
+                sourceInventory.Remove(UI_Manager.draggedSlot.slotID, sourceInventory.slots[UI_Manager.draggedSlot.slotID].count);
             }
-            Refresh();
+            
+            // Refresh the correct UI
+            GameManager.instance.uiManager.RefreshAll();
         }
 
         UI_Manager.draggedSlot = null; // Clear the dragged slot reference after removing the item
@@ -84,8 +128,17 @@ public class Inventory_UI : MonoBehaviour
     {
         if (slot == null) return;
 
+        // Check if the slot has an item before starting drag
+        if (slot.inventory == null || 
+            slot.slotID >= slot.inventory.slots.Count || 
+            string.IsNullOrEmpty(slot.inventory.slots[slot.slotID].itemName))
+        {
+            Debug.LogWarning("Cannot drag empty slot or invalid slot");
+            return;
+        }
+
         UI_Manager.draggedSlot = slot;
-        UI_Manager.draggedIcon = Instantiate(UI_Manager.draggedSlot.itemIcon);
+        UI_Manager.draggedIcon = Instantiate(slot.itemIcon);
         UI_Manager.draggedIcon.transform.SetParent(canvas.transform);
         UI_Manager.draggedIcon.raycastTarget = false;
         UI_Manager.draggedIcon.rectTransform.sizeDelta = new Vector2(50, 50);
@@ -119,18 +172,6 @@ public class Inventory_UI : MonoBehaviour
             Debug.Log("End Drag: " + UI_Manager.draggedSlot.name);
             UI_Manager.draggedSlot = null; // Clear the dragged slot reference
         }
-    }
-    public void SlotDrop(Slots_UI slot)
-    {
-        if (UI_Manager.dragSingle)
-        {
-            UI_Manager.draggedSlot.inventory.MoveSlot(UI_Manager.draggedSlot.slotID, slot.slotID, slot.inventory);
-        }
-        else
-        {
-            UI_Manager.draggedSlot.inventory.MoveSlot(UI_Manager.draggedSlot.slotID, slot.slotID, slot.inventory, UI_Manager.draggedSlot.inventory.slots[UI_Manager.draggedSlot.slotID].count);
-        }
-        GameManager.instance.uiManager.RefreshAll();
     }
     private void MoveToMousePosition(GameObject toMove)
     {

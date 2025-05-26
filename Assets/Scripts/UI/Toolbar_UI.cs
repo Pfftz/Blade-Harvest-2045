@@ -9,7 +9,22 @@ public class Toolbar_UI : MonoBehaviour
     private Slots_UI selectedSlot;
     private void Start()
     {
+        SetupKeyLabels(); // Add this line to setup key labels
         SelectSlot(0); // Select the first slot by default
+    }
+    
+    // Add this new method to setup key labels
+    private void SetupKeyLabels()
+    {
+        for (int i = 0; i < toolbarSlots.Count && i < 10; i++)
+        {
+            if (toolbarSlots[i] != null)
+            {
+                // Set key text: 1-9 for slots 0-8, 0 for slot 9
+                string keyText = (i == 9) ? "0" : (i + 1).ToString();
+                toolbarSlots[i].SetKeyText(keyText);
+            }
+        }
     }
     private void Update()
     {
@@ -18,16 +33,22 @@ public class Toolbar_UI : MonoBehaviour
             CheckAlphaNumericKeys();
         }
     }
+    public void SelectSlot(Slots_UI slot)
+    {
+        SelectSlot(slot.slotID);
+    }
     public void SelectSlot(int index)
     {
         if (toolbarSlots.Count == 10)
         {
-            if(selectedSlot != null)
+            if (selectedSlot != null)
             {
                 selectedSlot.SetHighlight(false); // Deselect the previous slot
             }
             selectedSlot = toolbarSlots[index];
             selectedSlot.SetHighlight(true); // Highlight the selected slot
+
+            GameManager.instance.player.inventoryManager.toolbar.SelectSlot(index); // Update the player's selected slot
         }
     }
     private void CheckAlphaNumericKeys()

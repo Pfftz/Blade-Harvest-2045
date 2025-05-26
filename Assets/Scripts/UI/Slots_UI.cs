@@ -10,8 +10,19 @@ public class Slots_UI : MonoBehaviour
     public Inventory inventory; // Reference to the inventory this slot belongs to
     public Image itemIcon;
     public TextMeshProUGUI quantityText;
+    public TextMeshProUGUI keyText; // Add this field for the key label
 
     [SerializeField] private GameObject highlight;
+    
+    // Add this method to set the key text
+    public void SetKeyText(string key)
+    {
+        if (keyText != null)
+        {
+            keyText.text = key;
+        }
+    }
+    
     public void SetItem(Inventory.Slot slot)
     {
         if (slot != null && slot.icon != null) // Add icon null check
