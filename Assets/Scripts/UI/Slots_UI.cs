@@ -7,6 +7,7 @@ using TMPro;
 public class Slots_UI : MonoBehaviour
 {
     public int slotID;
+    public Inventory inventory; // Reference to the inventory this slot belongs to
     public Image itemIcon;
     public TextMeshProUGUI quantityText;
 

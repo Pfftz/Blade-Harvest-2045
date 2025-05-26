@@ -379,10 +379,10 @@ RectTransform:
   m_Father: {fileID: 7198810686744700224}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: -25, y: -25}
+  m_SizeDelta: {x: 75, y: 75}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7198810686443764372
 CanvasRenderer:
@@ -516,9 +516,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 521bcbeac92663e4483742df07522ac3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  slotID: 0
+  inventory:
+    slots: []
   itemIcon: {fileID: 7198810686443764373}
   quantityText: {fileID: 7198810686383098327}
-  removeButton: {fileID: 0}
   highlight: {fileID: 6357315207166022506}
 --- !u!114 &-6716130039260134928
 MonoBehaviour:
