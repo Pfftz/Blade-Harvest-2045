@@ -102,3 +102,6 @@ Desktop.ini
 
 # Ignore package manager lock file (if using UPM)
 Packages/packages-lock.json
+
+# FastScriptReload plugin (if using personal license or don't want to share)
+/[Aa]ssets/FastScriptReload/

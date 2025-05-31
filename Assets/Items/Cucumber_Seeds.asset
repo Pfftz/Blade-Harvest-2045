@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b02ec2420ddbf78419d972e149a3aa8f, type: 3}
-  m_Name: Hoe
+  m_Name: Cucumber_Seeds
   m_EditorClassIdentifier: 
-  itemName: Hoe
-  icon: {fileID: -1408294579, guid: bdd33cb2ea526ff46878365b65d0f3e3, type: 3}
+  itemName: CucumberSeed
+  icon: {fileID: -2077874857, guid: bcdf668a522ba364ca177c560f24e051, type: 3}

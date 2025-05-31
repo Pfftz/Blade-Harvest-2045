@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 1248260432575893372}
   - component: {fileID: 4257957947477793300}
   m_Layer: 0
-  m_Name: Hoe_Collectable
+  m_Name: Shovel_Collectable
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -30,7 +30,7 @@ Transform:
   m_GameObject: {fileID: 3142145075616881492}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -2.237, y: -1.031, z: 0}
-  m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
@@ -77,7 +77,7 @@ SpriteRenderer:
   m_SortingLayerID: 546630051
   m_SortingLayer: 1
   m_SortingOrder: 1
-  m_Sprite: {fileID: -1408294579, guid: bdd33cb2ea526ff46878365b65d0f3e3, type: 3}
+  m_Sprite: {fileID: -1692523605, guid: 9b310f818768d544a8081831dc78b7a1, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -105,7 +105,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.8125, y: 0.6875}
+    oldSize: {x: 0.46875, y: 0.46875}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -159,5 +159,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c234ba8df3e6c9469a520c9c9fb24b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  data: {fileID: 11400000, guid: 9475709bb62135f46b785e2b36883268, type: 2}
+  data: {fileID: 11400000, guid: 4d946181e939ba14eb1549a8da9014ba, type: 2}
   rb: {fileID: 0}
