@@ -7,6 +7,8 @@ using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
+
+    [Header("Managers")]
     public ItemManager itemManager;
     public TileManager tileManager;
     public UI_Manager uiManager;
@@ -14,86 +16,93 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
+        // Singleton pattern with scene persistence
         if (instance != null && instance != this)
         {
             Destroy(gameObject);
+            return;
         }
-        else
-        {
-            instance = this;
-        }
+
+        instance = this;
         DontDestroyOnLoad(gameObject);
 
-        // Subscribe to scene loaded event
-        SceneManager.sceneLoaded += OnSceneLoaded;
+        // Ensure ItemManager is assigned (it should persist with GameManager)
+        if (itemManager == null)
+        {
+            itemManager = GetComponent<ItemManager>();
+            if (itemManager == null)
+            {
+                itemManager = FindObjectOfType<ItemManager>();
+            }
+        }
+    }
 
-        // Initial setup
-        RefreshReferences();
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        Debug.Log($"GameManager: Scene {scene.name} loaded, refreshing references");
-        StartCoroutine(DelayedRefreshReferences());
+        // Delay reference refresh to ensure all objects are initialized
+        StartCoroutine(DelayedRefreshManagerReferences());
     }
 
-    private IEnumerator DelayedRefreshReferences()
+    private IEnumerator DelayedRefreshManagerReferences()
     {
-        // Wait a frame for everything to initialize
-        yield return null;
-        RefreshReferences();
+        // Wait a bit to ensure all scene objects are properly instantiated
+        yield return new WaitForSeconds(0.2f);
+        RefreshManagerReferences();
     }
 
-    private void RefreshReferences()
+    public void RefreshManagerReferences()
     {
-        // ItemManager stays with GameManager (DontDestroyOnLoad)
+        // ItemManager should persist with GameManager, but double-check
         if (itemManager == null)
         {
             itemManager = GetComponent<ItemManager>();
+            if (itemManager == null)
+            {
+                itemManager = FindObjectOfType<ItemManager>();
+            }
+
+            if (itemManager == null)
+            {
+                Debug.LogError("ItemManager not found! Make sure it's on the GameManager GameObject or in the scene.");
+            }
         }
 
-        // Find scene-specific components
-        tileManager = FindObjectOfType<TileManager>();
-        uiManager = FindObjectOfType<UI_Manager>();
-        player = FindObjectOfType<Player>();
+        // Find managers in the new scene
+        if (tileManager == null)
+            tileManager = FindObjectOfType<TileManager>();
 
-        // Debug log to check what was found
-        Debug.Log($"GameManager References Refreshed:");
-        Debug.Log($"- ItemManager: {(itemManager != null ? "Found" : "Missing")}");
-        Debug.Log($"- TileManager: {(tileManager != null ? "Found" : "Missing")}");
-        Debug.Log($"- UI_Manager: {(uiManager != null ? "Found" : "Missing")}");
-        Debug.Log($"- Player: {(player != null ? "Found" : "Missing")}");
+        if (uiManager == null)
+            uiManager = FindObjectOfType<UI_Manager>();
 
-        // Check TileManager's interactableMap specifically
-        if (tileManager != null && tileManager.interactableMap != null)
+        if (player == null)
+            player = FindObjectOfType<Player>();
+
+        // Only refresh UI if all references are available
+        if (uiManager != null && player != null)
         {
-            Debug.Log("- TileManager.interactableMap: Found");
-        }
-        else if (tileManager != null)
-        {
-            Debug.LogError("- TileManager.interactableMap: Missing! Please assign it in the inspector.");
+            // Add a small delay to ensure Player's Start() has been called
+            StartCoroutine(DelayedUIRefresh());
         }
     }
 
-    private void Start()
+    private IEnumerator DelayedUIRefresh()
     {
-        // Ensure SceneTransitionManager exists
-        if (SceneTransitionManager.Instance == null)
+        // Wait for Player and InventoryManager to be fully initialized
+        yield return new WaitForSeconds(0.1f);
+
+        if (uiManager != null)
         {
-            GameObject transitionManager = new GameObject("SceneTransitionManager");
-            transitionManager.AddComponent<SceneTransitionManager>();
+            uiManager.RefreshAll();
         }
-    }
-
-    private void OnDestroy()
-    {
-        // Unsubscribe from scene loaded event
-        SceneManager.sceneLoaded -= OnSceneLoaded;
-    }
-
-    // Public method to manually refresh references if needed
-    public void ForceRefreshReferences()
-    {
-        RefreshReferences();
     }
 }

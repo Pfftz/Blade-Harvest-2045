@@ -2,6 +2,23 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using UnityEngine.SceneManagement;
+
+[System.Serializable]
+public class TileData
+{
+    public Vector3Int position;
+    public string plantedSeed;
+    public int growthPhase;
+    public string tileName;
+}
+
+[System.Serializable]
+public class SceneTileData
+{
+    public string sceneName;
+    public List<TileData> tiles = new List<TileData>();
+}
 
 public class TileManager : MonoBehaviour
 {
@@ -54,6 +71,9 @@ public class TileManager : MonoBehaviour
     // Dictionary to track growth phase of each plant
     private Dictionary<Vector3Int, int> plantGrowthPhase = new Dictionary<Vector3Int, int>();
 
+    // Static data to persist between scenes
+    private static Dictionary<string, List<TileData>> savedTileData = new Dictionary<string, List<TileData>>();
+
     void Start()
     {
         foreach (var position in interactableMap.cellBounds.allPositionsWithin)
@@ -64,6 +84,18 @@ public class TileManager : MonoBehaviour
             {
                 interactableMap.SetTile(position, hiddenInteratableTile);
             }
+        }
+
+        // Load tile data for current scene
+        LoadTileDataForCurrentScene();
+    }
+
+    private void OnDestroy()
+    {
+        // Only save if the tilemap still exists
+        if (interactableMap != null)
+        {
+            SaveTileDataForCurrentScene();
         }
     }
 
@@ -293,5 +325,97 @@ public class TileManager : MonoBehaviour
     public bool IsPlantFullyGrown(Vector3Int position)
     {
         return GetPlantGrowthPhase(position) == 5;
+    }
+
+    public void SaveTileDataForCurrentScene()
+    {
+        // Add null checks to prevent errors during scene destruction
+        if (interactableMap == null)
+        {
+            Debug.LogWarning("Cannot save tile data - interactableMap is null");
+            return;
+        }
+
+        string currentScene = SceneManager.GetActiveScene().name;
+        List<TileData> currentTileData = new List<TileData>();
+
+        try
+        {
+            // Save all plowed tiles and planted seeds
+            foreach (var position in interactableMap.cellBounds.allPositionsWithin)
+            {
+                TileBase tile = interactableMap.GetTile(position);
+                if (tile != null)
+                {
+                    string tileName = tile.name;
+
+                    // Save if it's not the default hidden tile
+                    if (tileName != "Interactable")
+                    {
+                        TileData tileData = new TileData
+                        {
+                            position = position,
+                            plantedSeed = GetPlantedSeed(position),
+                            growthPhase = GetPlantGrowthPhase(position),
+                            tileName = tileName
+                        };
+                        currentTileData.Add(tileData);
+                    }
+                }
+            }
+
+            savedTileData[currentScene] = currentTileData;
+            Debug.Log($"Saved {currentTileData.Count} tiles for scene {currentScene}");
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"Error saving tile data: {e.Message}");
+        }
+    }
+
+    public void LoadTileDataForCurrentScene()
+    {
+        string currentScene = SceneManager.GetActiveScene().name;
+
+        if (savedTileData.ContainsKey(currentScene))
+        {
+            List<TileData> tileDataList = savedTileData[currentScene];
+
+            foreach (TileData tileData in tileDataList)
+            {
+                // Restore tile
+                Tile tileToSet = GetTileByName(tileData.tileName);
+                if (tileToSet != null)
+                {
+                    interactableMap.SetTile(tileData.position, tileToSet);
+                }
+
+                // Restore plant data
+                if (!string.IsNullOrEmpty(tileData.plantedSeed))
+                {
+                    plantedSeeds[tileData.position] = tileData.plantedSeed;
+                    plantGrowthPhase[tileData.position] = tileData.growthPhase;
+                }
+            }
+
+            Debug.Log($"Loaded {tileDataList.Count} tiles for scene {currentScene}");
+        }
+    }
+
+    private Tile GetTileByName(string tileName)
+    {
+        // Map tile names to actual tile references
+        switch (tileName)
+        {
+            case "Plowed": return plowedTile;
+            case "TomatoSeeding": return tomatoSeedingTile;
+            case "TomatoPhase1": return tomatoPhase1Tile;
+            case "TomatoPhase2": return tomatoPhase2Tile;
+            case "TomatoPhase3": return tomatoPhase3Tile;
+            case "TomatoPhase4": return tomatoPhase4Tile;
+            case "TomatoHarvest": return tomatoHarvestTile;
+            // Add cases for all your tiles...
+            default: return hiddenInteratableTile;
+        }
     }
 }
