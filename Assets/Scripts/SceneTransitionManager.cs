@@ -470,21 +470,10 @@ public class SceneTransitionManager : MonoBehaviour
 
     private void LoadNextDayScene()
     {
-        // Save current scene data before switching - with null checks
-        if (GameManager.instance != null)
-        {
-            // Save tile data
-            if (GameManager.instance.tileManager != null)
-            {
-                GameManager.instance.tileManager.SaveTileDataForCurrentScene();
-            }
-
-            // Save player inventory
-            if (GameManager.instance.player != null)
-            {
-                GameManager.instance.player.SaveInventoryData();
-            }
-        }
+        Debug.Log("=== SAVING DATA BEFORE SCENE TRANSITION ===");
+        
+        // Force save tile data BEFORE any scene operations
+        SaveCurrentSceneData();
 
         currentDay++;
 
@@ -498,6 +487,51 @@ public class SceneTransitionManager : MonoBehaviour
             string nextSceneName = "Day" + currentDay;
             Debug.Log($"Loading scene: {nextSceneName}");
             StartCoroutine(LoadSceneAsync(nextSceneName));
+        }
+    }
+
+    // Add this method to ensure data is saved
+    private void SaveCurrentSceneData()
+    {
+        try
+        {
+            // Save tile data FIRST with extra safety checks
+            TileManager tileManager = FindObjectOfType<TileManager>();
+            if (tileManager != null)
+            {
+                Debug.Log("Found TileManager, saving tile data...");
+                tileManager.SaveTileDataForCurrentScene();
+            }
+            else if (GameManager.instance?.tileManager != null)
+            {
+                Debug.Log("Using GameManager TileManager reference...");
+                GameManager.instance.tileManager.SaveTileDataForCurrentScene();
+            }
+            else
+            {
+                Debug.LogWarning("No TileManager found - tile data will not be saved!");
+            }
+
+            // Save player inventory
+            Player player = FindObjectOfType<Player>();
+            if (player != null)
+            {
+                Debug.Log("Found Player, saving inventory data...");
+                player.SaveInventoryData();
+            }
+            else if (GameManager.instance?.player != null)
+            {
+                Debug.Log("Using GameManager Player reference...");
+                GameManager.instance.player.SaveInventoryData();
+            }
+            else
+            {
+                Debug.LogWarning("No Player found - inventory data will not be saved!");
+            }
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"Error saving scene data: {e.Message}");
         }
     }
 
