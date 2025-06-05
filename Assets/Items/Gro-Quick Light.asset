@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: Gro-Quick Light
   m_EditorClassIdentifier: 
   itemName: Gro-Quick Light
-  icon: {fileID: 694060837, guid: 9b310f818768d544a8081831dc78b7a1, type: 3}
+  icon: {fileID: 21300000, guid: 9f25406bb26216345a7b44b77a35f32b, type: 3}

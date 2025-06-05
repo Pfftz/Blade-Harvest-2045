@@ -6,6 +6,7 @@ public class Player : MonoBehaviour
 {
     public InventoryManager inventoryManager;
     private TileManager tileManager;
+    private StaminaManager staminaManager; // Add stamina manager reference
 
     // Static inventory data to persist between scenes
     private static Dictionary<string, List<InventorySlotData>> savedInventoryData;
@@ -21,6 +22,13 @@ public class Player : MonoBehaviour
     private void Awake()
     {
         inventoryManager = GetComponent<InventoryManager>();
+        staminaManager = GetComponent<StaminaManager>(); // Get stamina manager
+
+        // Add StaminaManager if it doesn't exist
+        if (staminaManager == null)
+        {
+            staminaManager = gameObject.AddComponent<StaminaManager>();
+        }
     }
 
     private void Start()
@@ -105,7 +113,7 @@ public class Player : MonoBehaviour
         }
 
         // Only proceed if all references are valid
-        if (tileManager != null && inventoryManager != null && inventoryManager.toolbar != null)
+        if (tileManager != null && inventoryManager != null && inventoryManager.toolbar != null && staminaManager != null)
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
@@ -128,23 +136,43 @@ public class Player : MonoBehaviour
 
                     if (tileName == "Interactable" && selectedItem == "Hoe")
                     {
-                        Debug.Log("Plowing tile...");
-                        tileManager.SetInteracted(position);
+                        // Check stamina before plowing
+                        int plowingCost = staminaManager.GetStaminaCostForAction("plowing");
+                        if (staminaManager.HasStamina(plowingCost))
+                        {
+                            Debug.Log("Plowing tile...");
+                            tileManager.SetInteracted(position);
+                            staminaManager.UseStamina(plowingCost);
+                        }
+                        else
+                        {
+                            Debug.Log("Not enough stamina to plow!");
+                        }
                     }
                     else if (tileName == "Plowed" && (selectedItem == "TomatoSeed" ||
                                                      selectedItem == "RiceSeed" ||
                                                      selectedItem == "CucumberSeed" ||
                                                      selectedItem == "CabbageSeed"))
                     {
-                        Debug.Log($"Planting {selectedItem}...");
-                        string seedType = selectedItem;
-                        tileManager.SetSeeding(position, seedType);
+                        // Check stamina before seeding
+                        int seedingCost = staminaManager.GetStaminaCostForAction("seeding");
+                        if (staminaManager.HasStamina(seedingCost))
+                        {
+                            Debug.Log($"Planting {selectedItem}...");
+                            string seedType = selectedItem;
+                            tileManager.SetSeeding(position, seedType);
 
-                        // Remove item from the toolbar slot
-                        inventoryManager.toolbar.selectedSlot.RemoveItem();
+                            // Remove item from the toolbar slot
+                            inventoryManager.toolbar.selectedSlot.RemoveItem();
 
-                        // Refresh the toolbar UI specifically
-                        GameManager.instance.uiManager.RefreshInventoryUI("Toolbar");
+                            // Use stamina and refresh UI
+                            staminaManager.UseStamina(seedingCost);
+                            GameManager.instance.uiManager.RefreshInventoryUI("Toolbar");
+                        }
+                        else
+                        {
+                            Debug.Log("Not enough stamina to plant!");
+                        }
                     }
                     // New: Gro-Quick Light functionality
                     else if (selectedItem == "Gro-Quick Light")
@@ -153,11 +181,21 @@ public class Player : MonoBehaviour
                         string plantedSeed = tileManager.GetPlantedSeed(position);
                         if (!string.IsNullOrEmpty(plantedSeed))
                         {
-                            // Grow the plant by one phase
-                            bool grown = tileManager.GrowPlant(position);
-                            if (grown)
+                            // Check stamina before using Gro-Quick Light
+                            int groQuickCost = staminaManager.GetStaminaCostForAction("gro-quick");
+                            if (staminaManager.HasStamina(groQuickCost))
                             {
-                                Debug.Log($"Plant grown! Current phase: {tileManager.GetPlantGrowthPhase(position)}");
+                                // Grow the plant by one phase
+                                bool grown = tileManager.GrowPlant(position);
+                                if (grown)
+                                {
+                                    Debug.Log($"Plant grown! Current phase: {tileManager.GetPlantGrowthPhase(position)}");
+                                    staminaManager.UseStamina(groQuickCost);
+                                }
+                            }
+                            else
+                            {
+                                Debug.Log("Not enough stamina to use Gro-Quick Light!");
                             }
                         }
                     }
@@ -167,8 +205,18 @@ public class Player : MonoBehaviour
                         // Check if there's a fully grown plant here
                         if (tileManager.IsPlantFullyGrown(position))
                         {
-                            Debug.Log("Harvesting plant...");
-                            tileManager.SetHarvesting(position);
+                            // Check stamina before harvesting
+                            int harvestingCost = staminaManager.GetStaminaCostForAction("harvesting");
+                            if (staminaManager.HasStamina(harvestingCost))
+                            {
+                                Debug.Log("Harvesting plant...");
+                                tileManager.SetHarvesting(position);
+                                staminaManager.UseStamina(harvestingCost);
+                            }
+                            else
+                            {
+                                Debug.Log("Not enough stamina to harvest!");
+                            }
                         }
                     }
                     // New: Shovel functionality
@@ -177,8 +225,18 @@ public class Player : MonoBehaviour
                         // Check if there's a plant at this position OR if it's a plowed tile
                         if (tileManager.HasPlantAtPosition(position) || tileName == "Plowed")
                         {
-                            Debug.Log("Using shovel...");
-                            tileManager.SetShoveling(position);
+                            // Check stamina before shoveling
+                            int shovelingCost = staminaManager.GetStaminaCostForAction("shoveling");
+                            if (staminaManager.HasStamina(shovelingCost))
+                            {
+                                Debug.Log("Using shovel...");
+                                tileManager.SetShoveling(position);
+                                staminaManager.UseStamina(shovelingCost);
+                            }
+                            else
+                            {
+                                Debug.Log("Not enough stamina to use shovel!");
+                            }
                         }
                     }
                     else
@@ -196,6 +254,7 @@ public class Player : MonoBehaviour
                 if (tileManager == null) Debug.LogWarning("TileManager is null!");
                 if (inventoryManager == null) Debug.LogWarning("InventoryManager is null!");
                 if (inventoryManager?.toolbar == null) Debug.LogWarning("Toolbar is null!");
+                if (staminaManager == null) Debug.LogWarning("StaminaManager is null!");
             }
         }
     }
@@ -350,4 +409,7 @@ public class Player : MonoBehaviour
             DropItem(item);
         }
     }
+
+    // Property to access stamina manager
+    public StaminaManager StaminaManager => staminaManager;
 }

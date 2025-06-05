@@ -8,7 +8,7 @@ public class Bed : MonoBehaviour
     [SerializeField] private Vector2 sleepDirection = Vector2.up;
     [SerializeField] private bool isUsable = true;
     [SerializeField] private float interactionRange = 2f;
-    
+
     [Header("Visual Settings")]
     [SerializeField] private SpriteRenderer bedSprite;
     [SerializeField] private Color highlightColor = Color.yellow;
@@ -62,7 +62,7 @@ public class Bed : MonoBehaviour
     {
         // Find player reference
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
-        
+
         // Hide popup initially
         if (interactPopup != null)
         {
@@ -164,7 +164,18 @@ public class Bed : MonoBehaviour
     {
         // Hide popup immediately
         ShowInteractPopup(false);
-        
+
+        // Restore player's stamina when sleeping
+        if (player != null)
+        {
+            Player playerComponent = player.GetComponent<Player>();
+            if (playerComponent != null && playerComponent.StaminaManager != null)
+            {
+                playerComponent.StaminaManager.RestoreFullStamina();
+                Debug.Log("Stamina fully restored from sleeping!");
+            }
+        }
+
         // Trigger the sleep transition
         if (SceneTransitionManager.Instance != null)
         {
@@ -211,7 +222,7 @@ public class Bed : MonoBehaviour
     public bool IsPlayerNearby => isPlayerNearby;
     public bool IsUsable => isUsable;
     public bool IsHighlighted => isHighlighted;
-    
+
     // Gizmos for debugging interaction range
     private void OnDrawGizmosSelected()
     {

@@ -87,6 +87,16 @@ public class GameManager : MonoBehaviour
         if (player == null)
             player = FindObjectOfType<Player>();
 
+        // Ensure player has stamina manager
+        if (player != null)
+        {
+            StaminaManager staminaManager = player.GetComponent<StaminaManager>();
+            if (staminaManager == null)
+            {
+                staminaManager = player.gameObject.AddComponent<StaminaManager>();
+            }
+        }
+
         // Only refresh UI if all references are available
         if (uiManager != null && player != null)
         {
