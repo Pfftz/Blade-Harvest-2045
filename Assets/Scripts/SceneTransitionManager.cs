@@ -25,8 +25,6 @@ public class SceneTransitionManager : MonoBehaviour
 
     // Store names to find references in new scenes
     private string transitionCanvasName = "Transition_Canvas";
-    private string fadeGroupName = "FadeGroup";
-    private string videoDisplayName = "VideoDisplay";
 
     private void Awake()
     {
