@@ -105,3 +105,14 @@ Packages/packages-lock.json
 
 # FastScriptReload plugin (if using personal license or don't want to share)
 /[Aa]ssets/FastScriptReload/
+
+# Unity Package Manager
+Packages/
+!Packages/manifest.json
+
+# Project Settings (to avoid version conflicts)
+ProjectSettings/
+!ProjectSettings/ProjectVersion.txt
+
+# User Settings
+UserSettings/

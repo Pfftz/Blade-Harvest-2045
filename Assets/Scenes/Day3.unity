@@ -2795,6 +2795,8 @@ MonoBehaviour:
   tileManager: {fileID: 0}
   uiManager: {fileID: 0}
   player: {fileID: 0}
+  pausedPanel: {fileID: 0}
+  movement: {fileID: 0}
 --- !u!4 &482948591
 Transform:
   m_ObjectHideFlags: 0
@@ -17240,7 +17242,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   quantityText: {fileID: 642180513}
-  staminaBar: {fileID: 0}
   staminaFrame: {fileID: 1978027566}
 --- !u!213 &1984963856
 Sprite:

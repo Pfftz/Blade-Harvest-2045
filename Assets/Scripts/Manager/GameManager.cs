@@ -14,6 +14,12 @@ public class GameManager : MonoBehaviour
     public UI_Manager uiManager;
     public Player player;
 
+    [Header("UI Elements - Paused")]
+    [SerializeField] GameObject pausedPanel;
+
+    [Header("Player Reference - Scripts")]
+    [SerializeField] Movement movement;
+
     private void Awake()
     {
         // Singleton pattern with scene persistence
@@ -34,6 +40,14 @@ public class GameManager : MonoBehaviour
             {
                 itemManager = FindObjectOfType<ItemManager>();
             }
+        }
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            TogglePause();
         }
     }
 
@@ -113,6 +127,21 @@ public class GameManager : MonoBehaviour
         if (uiManager != null)
         {
             uiManager.RefreshAll();
+        }
+    }
+
+    public void TogglePause()
+    {
+        if (pausedPanel != null)
+        {
+            bool isPaused = pausedPanel.activeSelf;
+            pausedPanel.SetActive(!isPaused);
+            Time.timeScale = isPaused ? 1f : 0f; // Pause or resume time
+            movement.enabled = isPaused; // Disable player movement when paused
+        }
+        else
+        {
+            Debug.LogWarning("Paused panel not assigned in GameManager!");
         }
     }
 }
