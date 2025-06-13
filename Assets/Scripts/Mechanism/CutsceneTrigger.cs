@@ -39,14 +39,21 @@ public class CutsceneTrigger : MonoBehaviour
     private bool isTyping = false;
     private int currentLineIndex = 0;
     private Transform player;
-    private Coroutine typingCoroutine;
-
-    private void Awake()
+    private Coroutine typingCoroutine; private void Awake()
     {
-        // Set the trigger tag
-        if (!gameObject.CompareTag("CutsceneTrigger"))
+        // Set the trigger tag - only if the tag exists
+        try
         {
-            gameObject.tag = "CutsceneTrigger";
+            if (!gameObject.CompareTag("CutsceneTrigger"))
+            {
+                gameObject.tag = "CutsceneTrigger";
+            }
+        }
+        catch (UnityException)
+        {
+            Debug.LogWarning("CutsceneTrigger tag not found. Please create it in Project Settings > Tags and Layers");
+            // Use Untagged as fallback
+            gameObject.tag = "Untagged";
         }
 
         // Get sprite renderer if not assigned
@@ -63,7 +70,7 @@ public class CutsceneTrigger : MonoBehaviour
 
         // Setup interact popup
         SetupInteractPopup();
-        
+
         // Setup cutscene UI
         SetupCutsceneUI();
     }
@@ -78,7 +85,7 @@ public class CutsceneTrigger : MonoBehaviour
         {
             interactPopup.SetActive(false);
         }
-        
+
         if (cutsceneUI != null)
         {
             cutsceneUI.SetActive(false);
@@ -149,7 +156,7 @@ public class CutsceneTrigger : MonoBehaviour
             // Create dialogue panel
             GameObject dialoguePanel = new GameObject("DialoguePanel");
             dialoguePanel.transform.SetParent(cutsceneUI.transform);
-            
+
             RectTransform panelRect = dialoguePanel.AddComponent<RectTransform>();
             panelRect.anchorMin = new Vector2(0, 0);
             panelRect.anchorMax = new Vector2(1, 0.3f);
@@ -163,7 +170,7 @@ public class CutsceneTrigger : MonoBehaviour
             // Create speaker name text
             GameObject speakerGO = new GameObject("SpeakerText");
             speakerGO.transform.SetParent(dialoguePanel.transform);
-            
+
             RectTransform speakerRect = speakerGO.AddComponent<RectTransform>();
             speakerRect.anchorMin = new Vector2(0.05f, 0.7f);
             speakerRect.anchorMax = new Vector2(0.95f, 0.95f);
@@ -179,7 +186,7 @@ public class CutsceneTrigger : MonoBehaviour
             // Create dialogue text
             GameObject dialogueGO = new GameObject("DialogueText");
             dialogueGO.transform.SetParent(dialoguePanel.transform);
-            
+
             RectTransform dialogueRect = dialogueGO.AddComponent<RectTransform>();
             dialogueRect.anchorMin = new Vector2(0.05f, 0.1f);
             dialogueRect.anchorMax = new Vector2(0.95f, 0.65f);
@@ -194,7 +201,7 @@ public class CutsceneTrigger : MonoBehaviour
             // Create continue prompt
             continuePrompt = new GameObject("ContinuePrompt");
             continuePrompt.transform.SetParent(dialoguePanel.transform);
-            
+
             RectTransform promptRect = continuePrompt.AddComponent<RectTransform>();
             promptRect.anchorMin = new Vector2(0.8f, 0.05f);
             promptRect.anchorMax = new Vector2(0.95f, 0.25f);
@@ -333,25 +340,25 @@ public class CutsceneTrigger : MonoBehaviour
     {
         isTyping = true;
         continuePrompt.SetActive(false);
-        
+
         if (typingCoroutine != null)
         {
             StopCoroutine(typingCoroutine);
         }
-        
+
         typingCoroutine = StartCoroutine(TypeText(text));
     }
 
     private System.Collections.IEnumerator TypeText(string text)
     {
         dialogueText.text = "";
-        
+
         foreach (char character in text)
         {
             dialogueText.text += character;
             yield return new WaitForSecondsRealtime(textSpeed);
         }
-        
+
         isTyping = false;
         continuePrompt.SetActive(true);
     }
@@ -359,7 +366,7 @@ public class CutsceneTrigger : MonoBehaviour
     private void NextDialogueLine()
     {
         currentLineIndex++;
-        
+
         if (currentLineIndex >= dialogueLines.Length)
         {
             EndCutscene();

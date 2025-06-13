@@ -465,13 +465,40 @@ public class SceneTransitionManager : MonoBehaviour
             transitionCanvas.SetActive(false);
         }
     }
-
     private void LoadNextDayScene()
     {
+        Debug.Log("=== STARTING NEXT DAY SCENE LOAD ===");
+        StartCoroutine(SaveAndLoadNextDay());
+    }
+
+    private IEnumerator SaveAndLoadNextDay()
+    {
         Debug.Log("=== SAVING DATA BEFORE SCENE TRANSITION ===");
-        
+
         // Force save tile data BEFORE any scene operations
         SaveCurrentSceneData();
+
+        // Wait a bit to ensure save operations complete
+        yield return new WaitForSeconds(0.5f);
+
+        // Verify the save was written
+        if (GameManager.instance?.currentSaveData != null)
+        {
+            string currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            if (GameManager.instance.currentSaveData.tileDataByScene.ContainsKey(currentScene))
+            {
+                var tileData = GameManager.instance.currentSaveData.tileDataByScene[currentScene];
+                int harvestCount = 0;
+                foreach (var tile in tileData.tiles)
+                {
+                    if (tile.tileName.Contains("Harvest"))
+                    {
+                        harvestCount++;
+                    }
+                }
+                Debug.Log($"VERIFICATION: Save data contains {harvestCount} harvest tiles for {currentScene}");
+            }
+        }
 
         currentDay++;
 
@@ -484,15 +511,15 @@ public class SceneTransitionManager : MonoBehaviour
         {
             string nextSceneName = "Day" + currentDay;
             Debug.Log($"Loading scene: {nextSceneName}");
-            StartCoroutine(LoadSceneAsync(nextSceneName));
+            yield return StartCoroutine(LoadSceneAsync(nextSceneName));
         }
-    }
-
-    // Add this method to ensure data is saved
+    }// Add this method to ensure data is saved
     private void SaveCurrentSceneData()
     {
         try
         {
+            Debug.Log("=== SAVING ALL GAME DATA BEFORE SCENE TRANSITION ===");
+
             // Save tile data FIRST with extra safety checks
             TileManager tileManager = FindObjectOfType<TileManager>();
             if (tileManager != null)
@@ -525,6 +552,18 @@ public class SceneTransitionManager : MonoBehaviour
             else
             {
                 Debug.LogWarning("No Player found - inventory data will not be saved!");
+            }
+
+            // CRITICAL: Save the entire game state to file through GameManager
+            if (GameManager.instance != null)
+            {
+                Debug.Log("Saving complete game state to file...");
+                GameManager.instance.SaveGame();
+                Debug.Log("Game state saved to file successfully!");
+            }
+            else
+            {
+                Debug.LogError("GameManager.instance is null - cannot save game to file!");
             }
         }
         catch (System.Exception e)

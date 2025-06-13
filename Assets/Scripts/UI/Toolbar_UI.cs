@@ -9,12 +9,24 @@ public class Toolbar_UI : MonoBehaviour
     [SerializeField] private Canvas canvas; // Add canvas reference for drag functionality
 
     private Slots_UI selectedSlot;
-    private Inventory toolbarInventory;
-
-    private void Awake()
+    private Inventory toolbarInventory; private void Awake()
     {
-        // Find canvas for drag functionality
-        canvas = FindObjectOfType<Canvas>();
+        // Find canvas for drag functionality - prioritize HUD canvas
+        canvas = GameObject.Find("HUD")?.GetComponent<Canvas>();
+        if (canvas == null)
+        {
+            // Fallback to any canvas
+            canvas = FindObjectOfType<Canvas>();
+        }
+
+        if (canvas == null)
+        {
+            Debug.LogError("No Canvas found for Toolbar drag functionality!");
+        }
+        else
+        {
+            Debug.Log($"Canvas found for Toolbar: {canvas.name}");
+        }
     }
 
     private void Start()

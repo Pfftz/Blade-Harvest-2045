@@ -32,12 +32,19 @@ public class MainmenuManager : MonoBehaviour
     void Start()
     {
         AudioManager.instance.PlayMusic(bgmSong, true);
+
+        // Check if save file exists and enable/disable load button accordingly
+        bool saveExists = SaveSystem.SaveExists();
+        loadButton.interactable = saveExists;
+
+        Debug.Log($"Save file exists: {saveExists}");
+        Debug.Log($"Save file path: {System.IO.Path.Combine(Application.persistentDataPath, "gamesave.json")}");
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     public void StartGame()
@@ -45,10 +52,25 @@ public class MainmenuManager : MonoBehaviour
         // Play button click sound
         AudioManager.instance.PlaySound(buttonClickSound);
 
+        // Delete existing save file to start fresh
+        if (SaveSystem.SaveExists())
+        {
+            SaveSystem.DeleteSave();
+            Debug.Log("Existing save file deleted for new game");
+        }
+
+        // Create new save data for day 1
+        GameSaveData newSaveData = new GameSaveData();
+        newSaveData.currentDay = 1;
+        newSaveData.currentScene = "IntroScene"; // Start with intro, but track Day1 as next
+        newSaveData.saveTime = System.DateTime.Now;
+        SaveSystem.SaveGame(newSaveData);
+        Debug.Log("New save file created for new game");
+
         transitionEffectObject.SetActive(true);
         LeanTween.alpha(transitionEffect.rectTransform, 1f, 1f).setEase(LeanTweenType.easeInSine).setOnComplete(() =>
         {
-            // Load the game scene
+            // Load the intro scene first
             UnityEngine.SceneManagement.SceneManager.LoadScene("IntroScene");
             // Hide the transition effect
             transitionEffectObject.SetActive(true);
@@ -60,9 +82,43 @@ public class MainmenuManager : MonoBehaviour
         // Play button click sound
         AudioManager.instance.PlaySound(buttonClickSound);
 
-        // Load the saved game data
-        // This is a placeholder; actual implementation will depend on how you save and load game data
-        Debug.Log("Load Game functionality not implemented yet.");
+        // Check if save file exists
+        if (!SaveSystem.SaveExists())
+        {
+            Debug.LogError("No save file found to load!");
+            return;
+        }
+
+        try
+        {
+            // Load the saved game data
+            GameSaveData saveData = SaveSystem.LoadGame();
+
+            if (saveData == null)
+            {
+                Debug.LogError("Failed to load save data - data is null!");
+                return;
+            }
+
+            // Store the loaded data in a persistent way (using PlayerPrefs temporarily)
+            PlayerPrefs.SetString("LoadedSaveData", JsonUtility.ToJson(saveData));
+            PlayerPrefs.SetInt("IsLoadingGame", 1);
+
+            Debug.Log($"Loading game from day {saveData.currentDay}, scene: {saveData.currentScene}");
+
+            transitionEffectObject.SetActive(true);
+            LeanTween.alpha(transitionEffect.rectTransform, 1f, 1f).setEase(LeanTweenType.easeInSine).setOnComplete(() =>
+            {            // Load the scene where the player last saved
+                string sceneToLoad = !string.IsNullOrEmpty(saveData.currentScene) ? saveData.currentScene : "IntroScene";
+                Debug.Log($"Loading scene: {sceneToLoad}");
+                UnityEngine.SceneManagement.SceneManager.LoadScene(sceneToLoad);
+                transitionEffectObject.SetActive(true);
+            });
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"Error loading game: {e.Message}");
+        }
     }
 
     public void Setting()
@@ -86,9 +142,9 @@ public class MainmenuManager : MonoBehaviour
             closeSettingButton.interactable = true;
         });
 
-}
+    }
 
-public void CloseSetting()
+    public void CloseSetting()
     {
         AudioManager.instance.PlaySound(buttonCloseSFX);
         // Close the settings panel        
@@ -108,7 +164,7 @@ public void CloseSetting()
 
     public void Credits()
     {
-        
+
     }
 
     public void CloseCredits()

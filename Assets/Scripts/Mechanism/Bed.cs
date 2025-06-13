@@ -159,7 +159,6 @@ public class Bed : MonoBehaviour
             bedSprite.color = originalColor;
         }
     }
-
     private void StartSleep()
     {
         // Hide popup immediately
@@ -174,6 +173,17 @@ public class Bed : MonoBehaviour
                 playerComponent.StaminaManager.RestoreFullStamina();
                 Debug.Log("Stamina fully restored from sleeping!");
             }
+        }
+
+        // Save the game progress (integrate with save system)
+        if (GameManager.instance != null)
+        {
+            GameManager.instance.OnPlayerSleep();
+            Debug.Log("Game saved on sleep - day advanced!");
+        }
+        else
+        {
+            Debug.LogError("GameManager instance not found for saving!");
         }
 
         // Trigger the sleep transition
