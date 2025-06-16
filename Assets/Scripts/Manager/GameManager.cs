@@ -14,6 +14,7 @@ public class GameManager : MonoBehaviour
     public UI_Manager uiManager;
     public Player player;
     public CurrencyManager currencyManager;
+    public ShopManager shopManager;
 
     [Header("UI Elements - Paused")]
     [SerializeField] GameObject pausedPanel;
@@ -178,6 +179,17 @@ public class GameManager : MonoBehaviour
                 GameObject currencyObj = new GameObject("CurrencyManager");
                 currencyManager = currencyObj.AddComponent<CurrencyManager>();
                 Debug.Log("Created new CurrencyManager");
+            }
+        }
+
+        if (shopManager == null)
+        {
+            shopManager = FindObjectOfType<ShopManager>();
+            if (shopManager == null)
+            {
+                GameObject shopObj = new GameObject("ShopManager");
+                shopManager = shopObj.AddComponent<ShopManager>();
+                Debug.Log("Created new ShopManager");
             }
         }
 
