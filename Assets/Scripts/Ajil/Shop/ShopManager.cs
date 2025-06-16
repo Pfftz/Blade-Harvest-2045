@@ -8,12 +8,13 @@ public class ShopManager : MonoBehaviour
 
     [Header("Shop Items")]
     [SerializeField] private List<ItemData> shopInventory = new List<ItemData>();
+    public List<ItemData> ShopInventory => shopInventory;
     
     [Header("UI References")]
     [SerializeField] private Shop_UI shopUI;
 
     [Header("Settings")]
-    [SerializeField] private float sellValueMultiplier = 0.75f; // Items sell for 75% of buy price
+    [SerializeField] private float sellValueMultiplier = 0.75f; 
 
     private void Awake()
     {

@@ -30,10 +30,15 @@ public class ShopInteractable : MonoBehaviour
             if (!isShopOpen)
             {
                 OpenShop();
+
+                shopUI.InitializeShop(GameManager.instance.shopManager.ShopInventory);
+
+                isShopOpen = true;
             }
             else
             {
                 CloseShop();
+                isShopOpen = false;
             }
         }
     }
