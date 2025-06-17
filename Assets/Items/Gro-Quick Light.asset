@@ -14,3 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemName: Gro-Quick Light
   icon: {fileID: 21300000, guid: 9f25406bb26216345a7b44b77a35f32b, type: 3}
+  description: Senter ajaib yang mempercepat pertumbuhan tanaman.
+  buyPrice: 10
+  canBuy: 1
+  canSell: 1
+  category: 4
