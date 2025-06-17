@@ -12,12 +12,14 @@ public class SceneTransitionManager : MonoBehaviour
     [SerializeField] private GameObject transitionCanvas;
     [SerializeField] private VideoPlayer videoPlayer;
     [SerializeField] private RawImage videoDisplay;
-    [SerializeField] private Image fadePanel;
-
-    [Header("Sleep Transition")]
+    [SerializeField] private Image fadePanel; [Header("Sleep Transition")]
     [SerializeField] private VideoClip sleepTransitionVideo;
     [SerializeField] private Sprite[] sleepAnimationSprites;
     [SerializeField] private float spriteAnimationSpeed = 0.2f;
+
+    [Header("Restaurant Transition")]
+    [SerializeField] private VideoClip restaurantTransitionVideo;
+    [SerializeField] private Sprite[] restaurantAnimationSprites;
 
     [Header("Day Management")]
     [SerializeField] private int currentDay = 1;
@@ -84,8 +86,8 @@ public class SceneTransitionManager : MonoBehaviour
                 foreach (Transform t in allTransforms)
                 {
                     if (t.gameObject.scene.IsValid() && // Only scene objects, not prefabs
-                        (t.name == "Transition_Canvas" || 
-                         t.name == "TransitionCanvas" || 
+                        (t.name == "Transition_Canvas" ||
+                         t.name == "TransitionCanvas" ||
                          t.name == "Transition Canvas" ||
                          t.name.ToLower().Contains("transition")))
                     {
@@ -210,7 +212,6 @@ public class SceneTransitionManager : MonoBehaviour
             Debug.LogWarning("Video display not available for video player setup");
         }
     }
-
     public void StartSleepTransition()
     {
         Debug.Log("StartSleepTransition called");
@@ -222,19 +223,53 @@ public class SceneTransitionManager : MonoBehaviour
             StartCoroutine(RefreshUIReferences());
             StartCoroutine(DelayedStartTransition());
             return;
+        }        // Check if player qualifies for restaurant transition
+        bool useRestaurantTransition = false;
+        GameObject restaurantManagerGO = GameObject.Find("RestaurantManager");
+        if (restaurantManagerGO != null)
+        {
+            var restaurantManager = restaurantManagerGO.GetComponent<MonoBehaviour>();
+            if (restaurantManager != null)
+            {
+                try
+                {
+                    useRestaurantTransition = (bool)restaurantManager.GetType().GetMethod("QualifiesForRestaurantTransition").Invoke(restaurantManager, null);
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogWarning($"Failed to call QualifiesForRestaurantTransition: {e.Message}");
+                }
+            }
+            Debug.Log($"Restaurant transition qualified: {useRestaurantTransition}");
         }
 
-        StartCoroutine(SleepTransitionCoroutine());
+        StartCoroutine(SleepTransitionCoroutine(useRestaurantTransition));
     }
-
     private IEnumerator DelayedStartTransition()
     {
         // Wait for UI references to be refreshed
         yield return new WaitForSeconds(0.5f);
 
         if (transitionCanvas != null)
-        {
-            StartCoroutine(SleepTransitionCoroutine());
+        {            // Check restaurant transition here too
+            bool useRestaurantTransition = false;
+            GameObject restaurantManagerGO = GameObject.Find("RestaurantManager");
+            if (restaurantManagerGO != null)
+            {
+                var restaurantManager = restaurantManagerGO.GetComponent<MonoBehaviour>();
+                if (restaurantManager != null)
+                {
+                    try
+                    {
+                        useRestaurantTransition = (bool)restaurantManager.GetType().GetMethod("QualifiesForRestaurantTransition").Invoke(restaurantManager, null);
+                    }
+                    catch (System.Exception e)
+                    {
+                        Debug.LogWarning($"Failed to call QualifiesForRestaurantTransition: {e.Message}");
+                    }
+                }
+            }
+            StartCoroutine(SleepTransitionCoroutine(useRestaurantTransition));
         }
         else
         {
@@ -242,7 +277,7 @@ public class SceneTransitionManager : MonoBehaviour
         }
     }
 
-    private IEnumerator SleepTransitionCoroutine()
+    private IEnumerator SleepTransitionCoroutine(bool useRestaurantTransition = false)
     {
         Debug.Log("Starting sleep transition...");
 
@@ -259,18 +294,21 @@ public class SceneTransitionManager : MonoBehaviour
         }
 
         // Disable player movement
-        DisablePlayerMovement();
+        DisablePlayerMovement();        // Choose transition type (video or sprite animation)
+        VideoClip videoToPlay = useRestaurantTransition && restaurantTransitionVideo != null ? restaurantTransitionVideo : sleepTransitionVideo;
+        Sprite[] spritesToPlay = useRestaurantTransition && restaurantAnimationSprites != null && restaurantAnimationSprites.Length > 0 ? restaurantAnimationSprites : sleepAnimationSprites;
 
-        // Choose transition type (video or sprite animation)
-        if (sleepTransitionVideo != null && videoPlayer != null && videoDisplay != null)
+        if (videoToPlay != null && videoPlayer != null && videoDisplay != null)
         {
-            Debug.Log("Playing video transition");
-            yield return StartCoroutine(PlayVideoTransition());
+            string transitionType = useRestaurantTransition ? "restaurant video" : "sleep video";
+            Debug.Log($"Playing {transitionType} transition");
+            yield return StartCoroutine(PlayVideoTransition(videoToPlay));
         }
-        else if (sleepAnimationSprites != null && sleepAnimationSprites.Length > 0)
+        else if (spritesToPlay != null && spritesToPlay.Length > 0)
         {
-            Debug.Log("Playing sprite animation transition");
-            yield return StartCoroutine(PlaySpriteAnimation());
+            string transitionType = useRestaurantTransition ? "restaurant sprite animation" : "sleep sprite animation";
+            Debug.Log($"Playing {transitionType} transition");
+            yield return StartCoroutine(PlaySpriteAnimation(spritesToPlay));
         }
         else
         {
@@ -285,7 +323,7 @@ public class SceneTransitionManager : MonoBehaviour
         LoadNextDayScene();
     }
 
-    private IEnumerator PlayVideoTransition()
+    private IEnumerator PlayVideoTransition(VideoClip videoClip)
     {
         if (videoDisplay != null)
         {
@@ -296,10 +334,8 @@ public class SceneTransitionManager : MonoBehaviour
         {
             Debug.LogError("Video display is null! Cannot play video transition.");
             yield break;
-        }
-
-        // Set the video clip
-        videoPlayer.clip = sleepTransitionVideo;
+        }        // Set the video clip
+        videoPlayer.clip = videoClip;
 
         // Prepare the video
         videoPlayer.Prepare();
@@ -375,8 +411,7 @@ public class SceneTransitionManager : MonoBehaviour
         // Reset color for next use
         videoDisplay.color = startColor;
     }
-
-    private IEnumerator PlaySpriteAnimation()
+    private IEnumerator PlaySpriteAnimation(Sprite[] sprites)
     {
         Image animationImage = transitionCanvas.GetComponentInChildren<Image>();
         if (animationImage == null)
@@ -386,7 +421,7 @@ public class SceneTransitionManager : MonoBehaviour
         }
 
         // Play sprite animation
-        foreach (Sprite sprite in sleepAnimationSprites)
+        foreach (Sprite sprite in sprites)
         {
             animationImage.sprite = sprite;
             yield return new WaitForSeconds(spriteAnimationSpeed);
@@ -499,13 +534,37 @@ public class SceneTransitionManager : MonoBehaviour
                 Debug.Log($"VERIFICATION: Save data contains {harvestCount} harvest tiles for {currentScene}");
             }
         }
-
         currentDay++;
+
+        // Reset restaurant tracking for new day
+        GameObject restaurantManagerGO = GameObject.Find("RestaurantManager");
+        if (restaurantManagerGO != null)
+        {
+            var restaurantManager = restaurantManagerGO.GetComponent<MonoBehaviour>();
+            if (restaurantManager != null)
+            {
+                restaurantManager.SendMessage("ResetDailyTracking", SendMessageOptions.DontRequireReceiver);
+            }
+        }
 
         if (currentDay > maxDays)
         {
-            Debug.Log("Game completed!");
-            SceneManager.LoadScene(0);
+            Debug.Log("Game completed! Checking ending...");
+            // Check for game ending with EndingManager
+            GameObject endingManagerGO = GameObject.Find("EndingManager");
+            if (endingManagerGO != null)
+            {
+                var endingManager = endingManagerGO.GetComponent<MonoBehaviour>();
+                if (endingManager != null)
+                {
+                    endingManager.SendMessage("CheckForGameEnding", currentDay, SendMessageOptions.DontRequireReceiver);
+                }
+            }
+            else
+            {
+                Debug.LogWarning("EndingManager not found! Loading main menu as fallback.");
+                SceneManager.LoadScene(0);
+            }
         }
         else
         {

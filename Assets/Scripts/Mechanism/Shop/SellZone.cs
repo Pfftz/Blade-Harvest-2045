@@ -10,7 +10,7 @@ public class SellZone : MonoBehaviour, IDropHandler
     [SerializeField] private Color normalColor = new Color(0.8f, 0.8f, 0.8f, 0.5f);
     [SerializeField] private Color highlightColor = new Color(1f, 0.92f, 0.016f, 0.7f);
     [SerializeField] private TextMeshProUGUI dropHereText;
-    
+
     [Header("Animation")]
     [SerializeField] private float pulseSpeed = 1f;
     [SerializeField] private float pulseAmount = 0.1f;
@@ -30,7 +30,7 @@ public class SellZone : MonoBehaviour, IDropHandler
                 .setEase(LeanTweenType.easeInOutSine);
         }
     }
-    
+
     public void OnDrop(PointerEventData eventData)
     {
         // Check if an item is being dragged and dropped
@@ -39,27 +39,47 @@ public class SellZone : MonoBehaviour, IDropHandler
             SellDraggedItem();
         }
     }
-    
+
     private void SellDraggedItem()
     {
         if (UI_Manager.draggedSlot == null || UI_Manager.draggedSlot.inventory == null) return;
-        
+
         int slotId = UI_Manager.draggedSlot.slotID;
         Inventory inventory = UI_Manager.draggedSlot.inventory;
-        
+
         if (slotId >= 0 && slotId < inventory.slots.Count)
         {
             string itemName = inventory.slots[slotId].itemName;
             int itemCount = UI_Manager.dragSingle ? 1 : inventory.slots[slotId].count;
-            
             // Sell the item
             if (!string.IsNullOrEmpty(itemName) && itemCount > 0 && ShopManager.instance != null)
             {
                 // Process the sale
                 bool success = ShopManager.instance.SellItem(itemName, itemCount);
-                
+
                 if (success)
-                {
+                {                    // Notify RestaurantManager about the plant sale
+                    GameObject restaurantManagerGO = GameObject.Find("RestaurantManager");
+                    if (restaurantManagerGO != null)
+                    {
+                        var restaurantManager = restaurantManagerGO.GetComponent<MonoBehaviour>();
+                        if (restaurantManager != null)
+                        {
+                            try
+                            {
+                                var method = restaurantManager.GetType().GetMethod("OnPlantSold");
+                                if (method != null)
+                                {
+                                    method.Invoke(restaurantManager, new object[] { itemName, itemCount });
+                                }
+                            }
+                            catch (System.Exception e)
+                            {
+                                Debug.LogWarning($"Failed to notify RestaurantManager: {e.Message}");
+                            }
+                        }
+                    }
+
                     // Remove from inventory
                     if (UI_Manager.dragSingle)
                     {
@@ -69,19 +89,19 @@ public class SellZone : MonoBehaviour, IDropHandler
                     {
                         inventory.Remove(slotId, itemCount);
                     }
-                    
+
                     // Update UI
                     if (GameManager.instance?.uiManager != null)
                     {
                         GameManager.instance.uiManager.RefreshAll();
                     }
-                    
+
                     // Flash effect
                     StartCoroutine(FlashEffect());
                 }
             }
         }
-        
+
         // Clear drag references
         if (UI_Manager.draggedIcon != null)
         {
@@ -90,7 +110,7 @@ public class SellZone : MonoBehaviour, IDropHandler
         }
         UI_Manager.draggedSlot = null;
     }
-    
+
     private System.Collections.IEnumerator FlashEffect()
     {
         if (backgroundImage != null)
@@ -100,7 +120,7 @@ public class SellZone : MonoBehaviour, IDropHandler
             backgroundImage.color = normalColor;
         }
     }
-    
+
     // Called by event trigger when item is dragged over
     public void OnDragEnter()
     {
@@ -109,7 +129,7 @@ public class SellZone : MonoBehaviour, IDropHandler
             backgroundImage.color = highlightColor;
         }
     }
-    
+
     // Called by event trigger when item is dragged out
     public void OnDragExit()
     {

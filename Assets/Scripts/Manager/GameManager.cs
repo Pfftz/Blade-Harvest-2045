@@ -6,9 +6,7 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-    public static GameManager instance;
-
-    [Header("Managers")]
+    public static GameManager instance; [Header("Managers")]
     public ItemManager itemManager;
     public TileManager tileManager;
     public UI_Manager uiManager;
@@ -395,9 +393,9 @@ public class GameManager : MonoBehaviour
         // Save currency data
         if (CurrencyManager.instance != null)
         {
-        currentSaveData.playerCurrency = CurrencyManager.instance.GetCurrentCurrency();
-        Debug.Log($"Currency saved: {currentSaveData.playerCurrency}");
-}
+            currentSaveData.playerCurrency = CurrencyManager.instance.GetCurrentCurrency();
+            Debug.Log($"Currency saved: {currentSaveData.playerCurrency}");
+        }
 
         // Update current day if you have a day system
         // currentSaveData.currentDay = GetCurrentDay();
