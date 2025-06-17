@@ -17038,6 +17038,21 @@ MonoBehaviour:
   groQuickLightCost: 2
   staminaRegenPerSecond: 1
   regenDelay: 5
+<<<<<<< HEAD
+=======
+--- !u!114 &1325979522
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1325979512}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c2374f5a76dad14e9f3002717c38bd8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+>>>>>>> 5ec2a01c289a518fe118eec9a2f89e6b958dde05
 --- !u!224 &1326041564 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 7198810686744700224, guid: 9ae9b31faa35be847a50608e68f4c375, type: 3}

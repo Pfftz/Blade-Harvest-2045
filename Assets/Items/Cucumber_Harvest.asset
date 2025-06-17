@@ -14,3 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemName: Cucumber
   icon: {fileID: 1794916350, guid: ed2ff86e51e032046ba5ed4387973a92, type: 3}
+  description: Mentimun segar yang baru dipanen
+  buyPrice: 10
+  canBuy: 1
+  canSell: 1
+  category: 4
