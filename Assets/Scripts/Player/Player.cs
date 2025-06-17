@@ -7,6 +7,7 @@ public class Player : MonoBehaviour
     public InventoryManager inventoryManager;
     private TileManager tileManager;
     private StaminaManager staminaManager; // Add stamina manager reference
+    private Movement movement; // Add movement reference for animations
 
     // Static inventory data to persist between scenes
     private static Dictionary<string, List<InventorySlotData>> savedInventoryData;
@@ -23,6 +24,7 @@ public class Player : MonoBehaviour
     {
         inventoryManager = GetComponent<InventoryManager>();
         staminaManager = GetComponent<StaminaManager>(); // Get stamina manager
+        movement = GetComponent<Movement>(); // Get movement component
 
         // Add StaminaManager if it doesn't exist
         if (staminaManager == null)
@@ -117,11 +119,12 @@ public class Player : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                Vector3Int position = new Vector3Int((int)transform.position.x, (int)transform.position.y, 0);
+                // Get the tile position in front of the player instead of the player's current position
+                Vector3Int position = movement.GetTileInFront(transform.position);
                 string tileName = tileManager.GetTileName(position);
 
                 // Debug current state
-                Debug.Log($"Position: {position}, Tile: {tileName}, Selected Item: {inventoryManager.toolbar.selectedSlot?.itemName ?? "NULL"}");
+                Debug.Log($"Player at: {transform.position}, Facing: {movement.FacingDirection}, Target tile: {position}, Tile: {tileName}, Selected Item: {inventoryManager.toolbar.selectedSlot?.itemName ?? "NULL"}");
 
                 if (!string.IsNullOrWhiteSpace(tileName))
                 {
@@ -174,9 +177,16 @@ public class Player : MonoBehaviour
                             Debug.Log("Not enough stamina to plant!");
                         }
                     }
-                    // New: Gro-Quick Light functionality
+                    // Updated: Gro-Quick Light functionality with animation lock
                     else if (selectedItem == "Gro-Quick Light")
                     {
+                        // Check if flash animation is already playing
+                        if (movement != null && movement.IsFlashAnimationPlaying)
+                        {
+                            Debug.Log("Flash animation is already playing, please wait...");
+                            return;
+                        }
+
                         // Check if there's a plant at this position
                         string plantedSeed = tileManager.GetPlantedSeed(position);
                         if (!string.IsNullOrEmpty(plantedSeed))
@@ -185,6 +195,12 @@ public class Player : MonoBehaviour
                             int groQuickCost = staminaManager.GetStaminaCostForAction("gro-quick");
                             if (staminaManager.HasStamina(groQuickCost))
                             {
+                                // Trigger flash animation
+                                if (movement != null)
+                                {
+                                    movement.TriggerFlashAnimation();
+                                }
+
                                 // Grow the plant by one phase
                                 bool grown = tileManager.GrowPlant(position);
                                 if (grown)

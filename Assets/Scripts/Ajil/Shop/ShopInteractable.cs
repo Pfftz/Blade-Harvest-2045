@@ -4,7 +4,6 @@ using TMPro;
 public class ShopInteractable : MonoBehaviour
 {
     [Header("Interaction Settings")]
-    [SerializeField] private float interactionDistance = 2f;
     [SerializeField] private KeyCode interactionKey = KeyCode.E;
     [SerializeField] private string interactMessage = "Press E to Open Shop";
     [SerializeField] private string exitMessage = "Press E to Close Shop";

@@ -72,16 +72,27 @@ public class SceneTransitionManager : MonoBehaviour
         // Wait a frame to ensure all scene objects are loaded
         yield return null;
 
-        // Find transition canvas by name
-        if (transitionCanvas == null || !transitionCanvas.activeInHierarchy)
+        // Find transition canvas by name (including inactive objects)
+        if (transitionCanvas == null)
         {
+            // Search for inactive objects too
             GameObject foundCanvas = GameObject.Find(transitionCanvasName);
             if (foundCanvas == null)
             {
-                // Try alternative names
-                foundCanvas = GameObject.Find("Transition_Canvas") ??
-                             GameObject.Find("TransitionCanvas") ??
-                             GameObject.Find("Transition Canvas");
+                // Try alternative names and search inactive objects
+                Transform[] allTransforms = Resources.FindObjectsOfTypeAll<Transform>();
+                foreach (Transform t in allTransforms)
+                {
+                    if (t.gameObject.scene.IsValid() && // Only scene objects, not prefabs
+                        (t.name == "Transition_Canvas" || 
+                         t.name == "TransitionCanvas" || 
+                         t.name == "Transition Canvas" ||
+                         t.name.ToLower().Contains("transition")))
+                    {
+                        foundCanvas = t.gameObject;
+                        break;
+                    }
+                }
             }
 
             if (foundCanvas != null)
@@ -91,26 +102,15 @@ public class SceneTransitionManager : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning("Transition canvas not found in scene! Looking for any canvas with 'Transition' in name...");
-                // Last resort: find any canvas with "Transition" in the name
-                Canvas[] allCanvases = FindObjectsOfType<Canvas>();
-                foreach (Canvas canvas in allCanvases)
-                {
-                    if (canvas.name.ToLower().Contains("transition"))
-                    {
-                        transitionCanvas = canvas.gameObject;
-                        Debug.Log($"Found transition canvas by search: {transitionCanvas.name}");
-                        break;
-                    }
-                }
+                Debug.LogError("Transition canvas not found in scene! Make sure 'Transition_Canvas' exists in the scene.");
             }
         }
 
         // Find fade panel and video display within the transition canvas
         if (transitionCanvas != null)
         {
-            // Find fade panel - look for Image components that might be fade panels
-            Image[] images = transitionCanvas.GetComponentsInChildren<Image>(true);
+            // Find fade panel - look for Image components that might be fade panels (including inactive)
+            Image[] images = transitionCanvas.GetComponentsInChildren<Image>(true); // true = include inactive
             foreach (Image img in images)
             {
                 // Look for fade panel by name or by being a solid black/dark image
@@ -139,8 +139,8 @@ public class SceneTransitionManager : MonoBehaviour
                 }
             }
 
-            // Find video display - look for RawImage components
-            RawImage[] rawImages = transitionCanvas.GetComponentsInChildren<RawImage>(true);
+            // Find video display - look for RawImage components (including inactive)
+            RawImage[] rawImages = transitionCanvas.GetComponentsInChildren<RawImage>(true); // true = include inactive
             foreach (RawImage rawImg in rawImages)
             {
                 if (rawImg.name.ToLower().Contains("video") ||

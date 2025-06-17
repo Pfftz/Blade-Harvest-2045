@@ -129,6 +129,14 @@ public class Inventory_UI : MonoBehaviour
         // Add comprehensive null checks
         if (UI_Manager.draggedSlot == null)
         {
+            // Don't show warning if we're in a shop context - this is normal behavior
+            if (ShopManager.instance != null && 
+                ShopManager.instance.gameObject.activeInHierarchy)
+            {
+                // Shop is active, this is probably a shop interaction, not an error
+                return;
+            }
+            
             Debug.LogWarning("No dragged slot to remove");
             return;
         }

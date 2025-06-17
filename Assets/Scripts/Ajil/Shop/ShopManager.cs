@@ -42,6 +42,9 @@ public class ShopManager : MonoBehaviour
     // Buy an item and add it to player inventory
     public bool BuyItem(ItemData itemData)
     {
+        // Clear any existing drag references at the start of purchase
+        ClearDragReferences();
+
         // Check if player has enough money
         if (CurrencyManager.instance == null)
         {
@@ -79,6 +82,9 @@ public class ShopManager : MonoBehaviour
 
         // Show success notification
         shopUI.ShowNotification($"Bought {itemData.itemName} for {itemData.buyPrice} coins");
+        
+        // Clear drag references again after successful purchase
+        ClearDragReferences();
         
         return true;
     }
@@ -161,5 +167,23 @@ public class ShopManager : MonoBehaviour
     {
         Item item = GameManager.instance.itemManager.GetItemByName(itemName);
         return item?.data;
+    }
+
+    // Helper method to clear drag references
+    private void ClearDragReferences()
+    {
+        if (UI_Manager.draggedSlot != null)
+        {
+            UI_Manager.draggedSlot = null;
+        }
+        
+        if (UI_Manager.draggedIcon != null)
+        {
+            if (UI_Manager.draggedIcon.gameObject != null)
+            {
+                Destroy(UI_Manager.draggedIcon.gameObject);
+            }
+            UI_Manager.draggedIcon = null;
+        }
     }
 }

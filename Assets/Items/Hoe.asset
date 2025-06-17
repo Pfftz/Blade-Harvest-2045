@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Hoe
   m_EditorClassIdentifier: 
   itemName: Hoe
-  icon: {fileID: -1408294579, guid: bdd33cb2ea526ff46878365b65d0f3e3, type: 3}
+  icon: {fileID: 21300000, guid: a87eb9a2844342a4e9fcac44b9e51aad, type: 3}
   description: Alat pertanian dasar untuk mencangkul tanah
   buyPrice: 10
   canBuy: 1
