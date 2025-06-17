@@ -296,7 +296,7 @@ GameObject:
   - component: {fileID: 183356953}
   - component: {fileID: 183356952}
   m_Layer: 5
-  m_Name: Button - New Game
+  m_Name: Button - Skip
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -398,7 +398,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 1163491078, guid: 73e0f33b9c334c041ab41b13c0a550c9, type: 3}
+  m_Sprite: {fileID: -1128193570, guid: cb96a312c047d4d4fb7d4d93349137b5, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
