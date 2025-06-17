@@ -13,6 +13,8 @@ public class GameManager : MonoBehaviour
     public TileManager tileManager;
     public UI_Manager uiManager;
     public Player player;
+    public CurrencyManager currencyManager;
+    public ShopManager shopManager;
 
     [Header("UI Elements - Paused")]
     [SerializeField] GameObject pausedPanel;
@@ -168,6 +170,29 @@ public class GameManager : MonoBehaviour
             }
         }
 
+        // Find CurrencyManager
+        if (currencyManager == null)
+        {
+            currencyManager = FindObjectOfType<CurrencyManager>();
+            if (currencyManager == null)
+            {
+                GameObject currencyObj = new GameObject("CurrencyManager");
+                currencyManager = currencyObj.AddComponent<CurrencyManager>();
+                Debug.Log("Created new CurrencyManager");
+            }
+        }
+
+        if (shopManager == null)
+        {
+            shopManager = FindObjectOfType<ShopManager>();
+            if (shopManager == null)
+            {
+                GameObject shopObj = new GameObject("ShopManager");
+                shopManager = shopObj.AddComponent<ShopManager>();
+                Debug.Log("Created new ShopManager");
+            }
+        }
+
         // Ensure player has stamina manager
         if (player != null)
         {
@@ -300,6 +325,13 @@ public class GameManager : MonoBehaviour
             // player.LoadInventoryData(currentSaveData.inventoryData[sceneName]);
         }
 
+        // Apply currency data
+        if (CurrencyManager.instance != null)
+        {
+            CurrencyManager.instance.SetCurrency(currentSaveData.playerCurrency);
+            Debug.Log($"Currency loaded: {currentSaveData.playerCurrency}");
+        }
+
         // Set current day (you might need to implement day system)
         Debug.Log($"Current day set to: {currentSaveData.currentDay}");
 
@@ -359,6 +391,13 @@ public class GameManager : MonoBehaviour
             Debug.Log("Updating inventory data");
             // currentSaveData.inventoryData[currentScene] = player.GetInventoryData();
         }
+
+        // Save currency data
+        if (CurrencyManager.instance != null)
+        {
+        currentSaveData.playerCurrency = CurrencyManager.instance.GetCurrentCurrency();
+        Debug.Log($"Currency saved: {currentSaveData.playerCurrency}");
+}
 
         // Update current day if you have a day system
         // currentSaveData.currentDay = GetCurrentDay();

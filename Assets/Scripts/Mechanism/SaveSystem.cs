@@ -10,6 +10,7 @@ public class GameSaveData
     public int currentDay = 1;
     public string currentScene = "IntroScene"; // Track which scene the player is currently in
     public System.DateTime saveTime; // When the save was created
+    public int playerCurrency = 0;
 }
 
 public static class SaveSystem

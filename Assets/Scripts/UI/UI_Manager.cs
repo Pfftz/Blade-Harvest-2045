@@ -122,6 +122,19 @@ public class UI_Manager : MonoBehaviour
         return null;
     }
 
+    public void ShowInventory(bool show)
+    {
+        if (inventoryPanel != null)
+        {
+            inventoryPanel.SetActive(show);
+            
+            if (show)
+            {
+                RefreshAll();
+            }
+        }
+    }
+
     void Initialize()
     {
         if (inventoryUIs == null) return;

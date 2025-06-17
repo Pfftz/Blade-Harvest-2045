@@ -554,6 +554,14 @@ public class SceneTransitionManager : MonoBehaviour
                 Debug.LogWarning("No Player found - inventory data will not be saved!");
             }
 
+            // Save currency data explicitly
+            if (CurrencyManager.instance != null && GameManager.instance != null)
+            {
+                int currentCurrency = CurrencyManager.instance.GetCurrentCurrency();
+                GameManager.instance.currentSaveData.playerCurrency = currentCurrency;
+                Debug.Log($"Saved currency amount: {currentCurrency}");
+            }
+
             // CRITICAL: Save the entire game state to file through GameManager
             if (GameManager.instance != null)
             {
