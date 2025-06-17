@@ -103,7 +103,18 @@ public class ShopManager : MonoBehaviour
         if (CurrencyManager.instance != null)
         {
             CurrencyManager.instance.AddCurrency(totalValue);
-            shopUI.ShowNotification($"Sold {quantity}x {itemName} for {totalValue} coins");
+            
+            // Only show notification if shop UI is active
+            if (shopUI != null && shopUI.gameObject.activeInHierarchy)
+            {
+                shopUI.ShowNotification($"Sold {quantity}x {itemName} for {totalValue} coins");
+            }
+            else
+            {
+                // Alternative: Log to console or use a different notification system
+                Debug.Log($"Sold {quantity}x {itemName} for {totalValue} coins");
+            }
+            
             return true;
         }
         

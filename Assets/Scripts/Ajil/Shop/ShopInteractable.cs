@@ -9,17 +9,30 @@ public class ShopInteractable : MonoBehaviour
     [SerializeField] private string interactMessage = "Press E to Open Shop";
     [SerializeField] private string exitMessage = "Press E to Close Shop";
     
+    [Header("UI Settings")]
+    [SerializeField] private GameObject interactPopup;
+    [SerializeField] private TextMeshProUGUI interactText;
+    
     [Header("Shop References")]
     [SerializeField] private Shop_UI shopUI;
     
     private bool isPlayerInRange = false;
     private bool isShopOpen = false;
-    private GameObject interactPopup;
-    private TextMeshProUGUI interactText;
     
     private void Start()
     {
-        SetupInteractPopup();
+        // Setup interact popup only if not assigned
+        if (interactPopup == null || interactText == null)
+        {
+            SetupInteractPopup();
+        }
+        
+        // Set initial text if component exists
+        if (interactText != null)
+        {
+            interactText.text = interactMessage;
+        }
+        
         ShowInteractPopup(false);
     }
     
@@ -30,9 +43,7 @@ public class ShopInteractable : MonoBehaviour
             if (!isShopOpen)
             {
                 OpenShop();
-
                 shopUI.InitializeShop(GameManager.instance.shopManager.ShopInventory);
-
                 isShopOpen = true;
             }
             else
@@ -49,7 +60,10 @@ public class ShopInteractable : MonoBehaviour
         {
             shopUI.OpenShop();
             isShopOpen = true;
-            interactText.text = exitMessage;
+            if (interactText != null)
+            {
+                interactText.text = exitMessage;
+            }
         }
     }
     
@@ -59,7 +73,10 @@ public class ShopInteractable : MonoBehaviour
         {
             shopUI.CloseShop();
             isShopOpen = false;
-            interactText.text = interactMessage;
+            if (interactText != null)
+            {
+                interactText.text = interactMessage;
+            }
         }
     }
     
@@ -89,13 +106,13 @@ public class ShopInteractable : MonoBehaviour
     
     private void SetupInteractPopup()
     {
-        // Create interact popup if not assigned
+        // Create interact popup if not assigned (fallback)
         if (interactPopup == null)
         {
             // Create popup GameObject
             interactPopup = new GameObject("InteractPopup");
             interactPopup.transform.SetParent(transform);
-            interactPopup.transform.localPosition = Vector3.up * 1.5f; // Position above shop
+            interactPopup.transform.localPosition = Vector3.up * 1.5f;
             
             // Add Canvas component for world space UI
             Canvas canvas = interactPopup.AddComponent<Canvas>();
@@ -120,6 +137,12 @@ public class ShopInteractable : MonoBehaviour
             // Setup RectTransform
             RectTransform rectTransform = textGO.GetComponent<RectTransform>();
             rectTransform.sizeDelta = new Vector2(200, 50);
+        }
+        
+        // Set text if component exists
+        if (interactText != null)
+        {
+            interactText.text = interactMessage;
         }
     }
     
