@@ -13,4 +13,9 @@ MonoBehaviour:
   m_Name: Cucumber_Seeds
   m_EditorClassIdentifier: 
   itemName: CucumberSeed
-  icon: {fileID: -2077874857, guid: bcdf668a522ba364ca177c560f24e051, type: 3}
+  icon: {fileID: 1820502810, guid: 35a6c1c4b400f804a917d46879b10b1a, type: 3}
+  description: Item description
+  buyPrice: 10
+  canBuy: 1
+  canSell: 1
+  category: 4

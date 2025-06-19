@@ -13,4 +13,9 @@ MonoBehaviour:
   m_Name: Cabbage_Seeds
   m_EditorClassIdentifier: 
   itemName: CabbageSeed
-  icon: {fileID: -2117698036, guid: bcdf668a522ba364ca177c560f24e051, type: 3}
+  icon: {fileID: -1877549558, guid: d9cbb935a784abc4da74243927f08227, type: 3}
+  description: Item description
+  buyPrice: 10
+  canBuy: 1
+  canSell: 1
+  category: 4

@@ -312,15 +312,13 @@ public class GameManager : MonoBehaviour
             // Force it to reload by calling LoadTileDataForCurrentScene again
             yield return new WaitForSeconds(0.1f);
             tileManager.LoadTileDataForCurrentScene();
-        }
-
-        // Apply inventory data if it exists
-        if (currentSaveData.inventoryData.ContainsKey(sceneName) && player != null)
+        }        // Apply inventory data if it exists
+        if (currentSaveData.GetInventoryDataForScene(sceneName) != null && player != null)
         {
             // Apply inventory data through Player
             // You'll need to add a LoadInventoryData method to your Player
             Debug.Log("Inventory data found for scene, applying...");
-            // player.LoadInventoryData(currentSaveData.inventoryData[sceneName]);
+            // player.LoadInventoryData(currentSaveData.GetInventoryDataForScene(sceneName));
         }
 
         // Apply currency data

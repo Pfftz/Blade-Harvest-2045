@@ -28,20 +28,27 @@ public class ShopManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
-    }
-
-    private void Start()
+    }    private void Start()
     {
         // Initialize the shop UI with available items
         if (shopUI != null)
         {
             shopUI.InitializeShop(shopInventory);
         }
-    }
-
-    // Buy an item and add it to player inventory
+        else
+        {
+            Debug.LogWarning("ShopUI is not assigned in ShopManager! UI notifications will not work.");
+        }
+    }// Buy an item and add it to player inventory
     public bool BuyItem(ItemData itemData)
     {
+        // Validate input
+        if (itemData == null)
+        {
+            Debug.LogError("ItemData is null in BuyItem!");
+            return false;
+        }
+
         // Clear any existing drag references at the start of purchase
         ClearDragReferences();
 
@@ -55,7 +62,8 @@ public class ShopManager : MonoBehaviour
         if (CurrencyManager.instance.GetCurrentCurrency() < itemData.buyPrice)
         {
             Debug.Log("Not enough money to buy " + itemData.itemName);
-            shopUI.ShowNotification("Not enough money!");
+            if (shopUI != null)
+                shopUI.ShowNotification("Not enough money!");
             return false;
         }
 
@@ -65,14 +73,13 @@ public class ShopManager : MonoBehaviour
         {
             Debug.LogError($"Item '{itemData.itemName}' not found in ItemManager");
             return false;
-        }
-
-        // Check if inventory has space
+        }        // Check if inventory has space
         bool canAddToInventory = CheckInventorySpace(itemToAdd);
         if (!canAddToInventory)
         {
             Debug.Log("Inventory is full!");
-            shopUI.ShowNotification("Inventory is full!");
+            if (shopUI != null)
+                shopUI.ShowNotification("Inventory is full!");
             return false;
         }
 
@@ -81,7 +88,10 @@ public class ShopManager : MonoBehaviour
         AddItemToInventory(itemToAdd);
 
         // Show success notification
-        shopUI.ShowNotification($"Bought {itemData.itemName} for {itemData.buyPrice} coins");
+        if (shopUI != null)
+            shopUI.ShowNotification($"Bought {itemData.itemName} for {itemData.buyPrice} coins");
+        else
+            Debug.Log($"Bought {itemData.itemName} for {itemData.buyPrice} coins");
         
         // Clear drag references again after successful purchase
         ClearDragReferences();
@@ -121,16 +131,15 @@ public class ShopManager : MonoBehaviour
                 Debug.Log($"Sold {quantity}x {itemName} for {totalValue} coins");
             }
             
-            return true;
-        }
+            return true;        }
         
         return false;
     }
 
-    // Helper methods
     private bool CheckInventorySpace(Item item)
     {
-        if (GameManager.instance?.player?.inventoryManager == null) return false;
+        if (item?.data == null || GameManager.instance?.player?.inventoryManager == null) 
+            return false;
         
         // Check backpack first
         Inventory backpack = GameManager.instance.player.inventoryManager.GetInventoryByName("Backpack");
@@ -151,6 +160,12 @@ public class ShopManager : MonoBehaviour
 
     private void AddItemToInventory(Item item)
     {
+        if (item == null)
+        {
+            Debug.LogError("Item is null in AddItemToInventory!");
+            return;
+        }
+
         if (GameManager.instance?.player?.inventoryManager != null)
         {
             GameManager.instance.player.inventoryManager.Add("Backpack", item);
@@ -160,6 +175,10 @@ public class ShopManager : MonoBehaviour
             {
                 GameManager.instance.uiManager.RefreshAll();
             }
+        }
+        else
+        {
+            Debug.LogError("GameManager, Player, or InventoryManager is null in AddItemToInventory!");
         }
     }
 

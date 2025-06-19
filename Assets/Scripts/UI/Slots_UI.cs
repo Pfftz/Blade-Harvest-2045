@@ -13,7 +13,7 @@ public class Slots_UI : MonoBehaviour
     public TextMeshProUGUI keyText; // Add this field for the key label
 
     [SerializeField] private GameObject highlight;
-    
+
     // Add this method to set the key text
     public void SetKeyText(string key)
     {
@@ -22,7 +22,7 @@ public class Slots_UI : MonoBehaviour
             keyText.text = key;
         }
     }
-    
+
     public void SetItem(Inventory.Slot slot)
     {
         if (slot != null && slot.icon != null) // Add icon null check
@@ -46,5 +46,25 @@ public class Slots_UI : MonoBehaviour
     public void SetHighlight(bool isOn)
     {
         highlight.SetActive(isOn);
+    }
+
+    // Add method to handle slot clicking for selection
+    public void OnSlotClick()
+    {
+        // Find the parent Inventory_UI and select this slot
+        Inventory_UI parentInventoryUI = GetComponentInParent<Inventory_UI>();
+        if (parentInventoryUI != null)
+        {
+            parentInventoryUI.SelectSlot(this);
+        }
+
+        // Also handle toolbar selection
+        Toolbar_UI parentToolbarUI = GetComponentInParent<Toolbar_UI>();
+        if (parentToolbarUI != null)
+        {
+            parentToolbarUI.SelectSlot(this);
+        }
+
+        Debug.Log($"Slot {slotID} clicked and selected");
     }
 }

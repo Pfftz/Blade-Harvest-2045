@@ -3,6 +3,9 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.Video;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class SceneTransitionManager : MonoBehaviour
 {
@@ -26,9 +29,7 @@ public class SceneTransitionManager : MonoBehaviour
     [SerializeField] private int maxDays = 7;
 
     // Store names to find references in new scenes
-    private string transitionCanvasName = "Transition_Canvas";
-
-    private void Awake()
+    private string transitionCanvasName = "Transition_Canvas"; private void Awake()
     {
         if (Instance != null && Instance != this)
         {
@@ -37,6 +38,9 @@ public class SceneTransitionManager : MonoBehaviour
         }
         Instance = this;
         DontDestroyOnLoad(gameObject);
+
+        // Ensure this GameObject stays active across scenes
+        gameObject.SetActive(true);
 
         // Store the names of UI objects for later reference finding
         if (transitionCanvas != null)
@@ -68,7 +72,6 @@ public class SceneTransitionManager : MonoBehaviour
         // Re-find UI references in the new scene
         StartCoroutine(RefreshUIReferences());
     }
-
     private IEnumerator RefreshUIReferences()
     {
         // Wait a frame to ensure all scene objects are loaded
@@ -77,19 +80,19 @@ public class SceneTransitionManager : MonoBehaviour
         // Find transition canvas by name (including inactive objects)
         if (transitionCanvas == null)
         {
-            // Search for inactive objects too
+            // Search for the canvas by name first
             GameObject foundCanvas = GameObject.Find(transitionCanvasName);
+
             if (foundCanvas == null)
             {
-                // Try alternative names and search inactive objects
+                // Search through all inactive objects too
                 Transform[] allTransforms = Resources.FindObjectsOfTypeAll<Transform>();
                 foreach (Transform t in allTransforms)
                 {
                     if (t.gameObject.scene.IsValid() && // Only scene objects, not prefabs
                         (t.name == "Transition_Canvas" ||
                          t.name == "TransitionCanvas" ||
-                         t.name == "Transition Canvas" ||
-                         t.name.ToLower().Contains("transition")))
+                         t.name == "Transition Canvas"))
                     {
                         foundCanvas = t.gameObject;
                         break;
@@ -105,71 +108,72 @@ public class SceneTransitionManager : MonoBehaviour
             else
             {
                 Debug.LogError("Transition canvas not found in scene! Make sure 'Transition_Canvas' exists in the scene.");
+                yield break;
             }
         }
 
         // Find fade panel and video display within the transition canvas
         if (transitionCanvas != null)
         {
-            // Find fade panel - look for Image components that might be fade panels (including inactive)
-            Image[] images = transitionCanvas.GetComponentsInChildren<Image>(true); // true = include inactive
-            foreach (Image img in images)
-            {
-                // Look for fade panel by name or by being a solid black/dark image
-                if (img.name.ToLower().Contains("fade") ||
-                    img.name.ToLower().Contains("black") ||
-                    img.name.ToLower().Contains("panel"))
-                {
-                    fadePanel = img;
-                    Debug.Log($"Found fade panel: {fadePanel.name}");
-                    break;
-                }
-            }
+            // Temporarily activate the canvas to search for children
+            bool wasActive = transitionCanvas.activeSelf;
+            transitionCanvas.SetActive(true);
 
-            // If not found by name, look for an Image with black color
+            // Find fade panel
             if (fadePanel == null)
             {
+                Image[] images = transitionCanvas.GetComponentsInChildren<Image>(true);
                 foreach (Image img in images)
                 {
-                    if (img.color == Color.black ||
-                        (img.color.r < 0.1f && img.color.g < 0.1f && img.color.b < 0.1f))
+                    if (img.name.ToLower().Contains("fade") ||
+                        img.name.ToLower().Contains("black") ||
+                        img.name.ToLower().Contains("panel"))
                     {
                         fadePanel = img;
-                        Debug.Log($"Found fade panel by color: {fadePanel.name}");
+                        Debug.Log($"Found fade panel: {fadePanel.name}");
                         break;
                     }
                 }
-            }
 
-            // Find video display - look for RawImage components (including inactive)
-            RawImage[] rawImages = transitionCanvas.GetComponentsInChildren<RawImage>(true); // true = include inactive
-            foreach (RawImage rawImg in rawImages)
-            {
-                if (rawImg.name.ToLower().Contains("video") ||
-                    rawImg.name.ToLower().Contains("display"))
+                if (fadePanel == null)
                 {
-                    videoDisplay = rawImg;
-                    Debug.Log($"Found video display: {videoDisplay.name}");
-                    break;
+                    Debug.LogWarning("Fade panel not found in transition canvas!");
                 }
             }
 
-            // If not found by name, just use the first RawImage
-            if (videoDisplay == null && rawImages.Length > 0)
+            // Find video display
+            if (videoDisplay == null)
             {
-                videoDisplay = rawImages[0];
-                Debug.Log($"Using first RawImage as video display: {videoDisplay.name}");
+                RawImage[] rawImages = transitionCanvas.GetComponentsInChildren<RawImage>(true);
+                foreach (RawImage rawImg in rawImages)
+                {
+                    if (rawImg.name.ToLower().Contains("video") ||
+                        rawImg.name.ToLower().Contains("display"))
+                    {
+                        videoDisplay = rawImg;
+                        Debug.Log($"Found video display: {videoDisplay.name}");
+                        break;
+                    }
+                }
+
+                // If not found by name, use the first RawImage
+                if (videoDisplay == null && rawImages.Length > 0)
+                {
+                    videoDisplay = rawImages[0];
+                    Debug.Log($"Using first RawImage as video display: {videoDisplay.name}");
+                }
+
+                if (videoDisplay == null)
+                {
+                    Debug.LogWarning("Video display not found in transition canvas!");
+                }
             }
 
-            // Ensure transition canvas is initially hidden
-            transitionCanvas.SetActive(false);
-        }
-        else
-        {
-            Debug.LogError("Could not find transition canvas in the scene! Make sure it exists and is named correctly.");
+            // Restore the original active state
+            transitionCanvas.SetActive(wasActive);
         }
 
-        // Re-setup video player with new references
+        // Re-setup video player with found references
         if (sleepTransitionVideo != null)
         {
             SetupVideoPlayer();
@@ -216,14 +220,20 @@ public class SceneTransitionManager : MonoBehaviour
     {
         Debug.Log("StartSleepTransition called");
 
+        // Ensure this GameObject is active before starting coroutines
+        if (!gameObject.activeInHierarchy)
+        {
+            Debug.LogWarning("SceneTransitionManager GameObject was inactive! Reactivating...");
+            gameObject.SetActive(true);
+        }
+
         // Ensure we have valid references before starting transition
         if (transitionCanvas == null)
         {
-            Debug.LogError("Cannot start transition - transition canvas is missing!");
-            StartCoroutine(RefreshUIReferences());
-            StartCoroutine(DelayedStartTransition());
+            Debug.LogError("Cannot start transition - transition canvas is missing! Refreshing references...");
+            StartCoroutine(RefreshUIReferencesAndStartTransition());
             return;
-        }        // Check if player qualifies for restaurant transition
+        }// Check if player qualifies for restaurant transition
         bool useRestaurantTransition = false;
         GameObject restaurantManagerGO = GameObject.Find("RestaurantManager");
         if (restaurantManagerGO != null)
@@ -276,7 +286,6 @@ public class SceneTransitionManager : MonoBehaviour
             Debug.LogError("Still no transition canvas found after refresh!");
         }
     }
-
     private IEnumerator SleepTransitionCoroutine(bool useRestaurantTransition = false)
     {
         Debug.Log("Starting sleep transition...");
@@ -290,11 +299,15 @@ public class SceneTransitionManager : MonoBehaviour
         else
         {
             Debug.LogError("Transition canvas is null! Cannot proceed with transition.");
+            // Still proceed with scene loading as fallback
+            LoadNextDayScene();
             yield break;
         }
 
         // Disable player movement
-        DisablePlayerMovement();        // Choose transition type (video or sprite animation)
+        DisablePlayerMovement();
+
+        // Choose transition type (video or sprite animation)
         VideoClip videoToPlay = useRestaurantTransition && restaurantTransitionVideo != null ? restaurantTransitionVideo : sleepTransitionVideo;
         Sprite[] spritesToPlay = useRestaurantTransition && restaurantAnimationSprites != null && restaurantAnimationSprites.Length > 0 ? restaurantAnimationSprites : sleepAnimationSprites;
 
@@ -310,11 +323,15 @@ public class SceneTransitionManager : MonoBehaviour
             Debug.Log($"Playing {transitionType} transition");
             yield return StartCoroutine(PlaySpriteAnimation(spritesToPlay));
         }
-        else
+        else if (fadePanel != null)
         {
             Debug.Log("Playing simple fade transition");
-            // Fallback to simple fade
             yield return StartCoroutine(SimpleFadeTransition());
+        }
+        else
+        {
+            Debug.LogWarning("No transition elements available! Proceeding with direct scene load.");
+            yield return new WaitForSeconds(1f); // Brief pause for user experience
         }
 
         Debug.Log("Transition complete, loading next day scene...");
@@ -505,24 +522,33 @@ public class SceneTransitionManager : MonoBehaviour
         Debug.Log("=== STARTING NEXT DAY SCENE LOAD ===");
         StartCoroutine(SaveAndLoadNextDay());
     }
-
     private IEnumerator SaveAndLoadNextDay()
     {
-        Debug.Log("=== SAVING DATA BEFORE SCENE TRANSITION ===");
-
-        // Force save tile data BEFORE any scene operations
+        Debug.Log("=== SAVING DATA BEFORE SCENE TRANSITION ===");        // Reset hasBeenSaved flag to ensure tile data can be saved
+        TileManager tileManager = FindObjectOfType<TileManager>();
+        if (tileManager != null)
+        {
+            // Force reset the saved flag to ensure we can save again
+            tileManager.ResetSaveFlag();
+            Debug.Log("Reset hasBeenSaved flag to ensure tile data can be saved");
+        }        // Force save tile data BEFORE any scene operations
         SaveCurrentSceneData();
 
-        // Wait a bit to ensure save operations complete
-        yield return new WaitForSeconds(0.5f);
+        // Debug: Check what was actually saved
+        TileManager debugTileManager = FindObjectOfType<TileManager>();
+        if (debugTileManager != null)
+        {
+            debugTileManager.DebugCurrentSaveData();
+        }
 
-        // Verify the save was written
+        // Wait a bit to ensure save operations complete
+        yield return new WaitForSeconds(0.5f);        // Verify the save was written
         if (GameManager.instance?.currentSaveData != null)
         {
             string currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
-            if (GameManager.instance.currentSaveData.tileDataByScene.ContainsKey(currentScene))
+            if (GameManager.instance.currentSaveData.HasTileDataForScene(currentScene))
             {
-                var tileData = GameManager.instance.currentSaveData.tileDataByScene[currentScene];
+                var tileData = GameManager.instance.currentSaveData.GetTileDataForScene(currentScene);
                 int harvestCount = 0;
                 foreach (var tile in tileData.tiles)
                 {
@@ -533,17 +559,19 @@ public class SceneTransitionManager : MonoBehaviour
                 }
                 Debug.Log($"VERIFICATION: Save data contains {harvestCount} harvest tiles for {currentScene}");
             }
+            else
+            {
+                Debug.LogWarning($"No tile data found for current scene {currentScene} in save data!");
+            }
         }
-        currentDay++;
-
-        // Reset restaurant tracking for new day
+        currentDay++;        // Reset restaurant tracking for new day
         GameObject restaurantManagerGO = GameObject.Find("RestaurantManager");
         if (restaurantManagerGO != null)
         {
             var restaurantManager = restaurantManagerGO.GetComponent<MonoBehaviour>();
             if (restaurantManager != null)
             {
-                restaurantManager.SendMessage("ResetDailyTracking", SendMessageOptions.DontRequireReceiver);
+                restaurantManager.SendMessage("StartNewDay", SendMessageOptions.DontRequireReceiver);
             }
         }
 
@@ -638,13 +666,13 @@ public class SceneTransitionManager : MonoBehaviour
             Debug.LogError($"Error saving scene data: {e.Message}");
         }
     }
-
     private IEnumerator LoadSceneAsync(string sceneName)
     {
         // Check if scene exists in build settings
         bool sceneExists = false;
         for (int i = 0; i < SceneManager.sceneCountInBuildSettings; i++)
         {
+#if UNITY_EDITOR
             string scenePath = SceneUtility.GetScenePathByBuildIndex(i);
             string sceneNameInBuild = System.IO.Path.GetFileNameWithoutExtension(scenePath);
             if (sceneNameInBuild == sceneName)
@@ -652,6 +680,11 @@ public class SceneTransitionManager : MonoBehaviour
                 sceneExists = true;
                 break;
             }
+#else
+            // In build, just try to load and handle the exception
+            sceneExists = true;
+            break;
+#endif
         }
 
         if (!sceneExists)
@@ -746,5 +779,30 @@ public class SceneTransitionManager : MonoBehaviour
 
     // Public methods for external use
     public int GetCurrentDay() => currentDay;
-    public void SetCurrentDay(int day) => currentDay = day;
+    public void SetCurrentDay(int day) => currentDay = day;    /// <summary>
+                                                               /// Force refresh of UI references - useful for debugging or when canvas is lost
+                                                               /// </summary>
+    [ContextMenu("Force Refresh UI References")]
+    public void ForceRefreshUIReferences()
+    {
+        Debug.Log("Forcing refresh of UI references...");
+        transitionCanvas = null;
+        fadePanel = null;
+        videoDisplay = null;
+        StartCoroutine(RefreshUIReferences());
+    }
+    private IEnumerator RefreshUIReferencesAndStartTransition()
+    {
+        yield return StartCoroutine(RefreshUIReferences());
+
+        // Try starting transition again after refresh
+        if (transitionCanvas != null)
+        {
+            StartSleepTransition();
+        }
+        else
+        {
+            Debug.LogError("Failed to find transition canvas after refresh!");
+        }
+    }
 }

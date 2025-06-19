@@ -13,4 +13,9 @@ MonoBehaviour:
   m_Name: Tomato_Seeds
   m_EditorClassIdentifier: 
   itemName: TomatoSeed
-  icon: {fileID: -239754455, guid: bcb489dc43b851d4094c44068a58214e, type: 3}
+  icon: {fileID: 382121524, guid: f0ecac6f9d799e247adca53b4c0e81ef, type: 3}
+  description: Item description
+  buyPrice: 10
+  canBuy: 1
+  canSell: 1
+  category: 4

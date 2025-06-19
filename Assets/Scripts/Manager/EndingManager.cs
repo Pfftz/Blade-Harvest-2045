@@ -1,6 +1,10 @@
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using System.Collections;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class EndingManager : MonoBehaviour
 {
@@ -74,23 +78,21 @@ public class EndingManager : MonoBehaviour
         {
             TriggerBadEnding();
         }
-    }
-
-    /// <summary>
-    /// Trigger the good ending cutscene
-    /// </summary>
+    }    /// <summary>
+         /// Trigger the good ending cutscene
+         /// </summary>
     private void TriggerGoodEnding()
     {
         Debug.Log("Triggering good ending!");
 
         if (cutsceneController != null)
         {
-            // Play good ending cutscene
-            cutsceneController.RunCutscene(Cutscenes.GoodEndingCutscene, OnGoodEndingCutsceneComplete);
+            // Play good ending cutscene directly
+            cutsceneController.RunCutscene(Cutscenes.GoodEnding, OnGoodEndingCutsceneComplete);
         }
         else
         {
-            // Fallback: directly load good ending scene
+            // Fallback: directly load good ending scene with CutsceneManager
             Debug.LogWarning("CutsceneController not found! Loading good ending scene directly.");
             LoadGoodEndingScene();
         }
@@ -105,12 +107,12 @@ public class EndingManager : MonoBehaviour
 
         if (cutsceneController != null)
         {
-            // Play bad ending cutscene
-            cutsceneController.RunCutscene(Cutscenes.BadEndingCutscene, OnBadEndingCutsceneComplete);
+            // Play bad ending cutscene directly
+            cutsceneController.RunCutscene(Cutscenes.BadEnding, OnBadEndingCutsceneComplete);
         }
         else
         {
-            // Fallback: directly load bad ending scene
+            // Fallback: directly load bad ending scene with CutsceneManager
             Debug.LogWarning("CutsceneController not found! Loading bad ending scene directly.");
             LoadBadEndingScene();
         }
@@ -132,26 +134,37 @@ public class EndingManager : MonoBehaviour
     {
         Debug.Log("Bad ending cutscene completed!");
         LoadBadEndingScene();
-    }
-
-    /// <summary>
-    /// Load the good ending scene
-    /// </summary>
+    }    /// <summary>
+         /// Load the good ending scene
+         /// </summary>
     private void LoadGoodEndingScene()
     {
         // You can create a dedicated good ending scene, or just return to main menu with a flag
         PlayerPrefs.SetInt("LastEndingWasGood", 1);
         PlayerPrefs.Save();
 
-        if (SceneManager.GetSceneByName(goodEndingSceneName).IsValid())
+        // Check if the scene exists in build settings
+        bool sceneExists = false;
+        for (int i = 0; i < SceneManager.sceneCountInBuildSettings; i++)
+        {
+            string scenePath = SceneUtility.GetScenePathByBuildIndex(i);
+            string sceneName = System.IO.Path.GetFileNameWithoutExtension(scenePath);
+            if (sceneName == goodEndingSceneName)
+            {
+                sceneExists = true;
+                break;
+            }
+        }
+
+        if (sceneExists)
         {
             SceneManager.LoadScene(goodEndingSceneName);
         }
         else
         {
-            // Fallback to main menu
-            Debug.LogWarning($"Good ending scene '{goodEndingSceneName}' not found! Loading main menu.");
-            SceneManager.LoadScene(mainMenuSceneName);
+            // Fallback: display ending message and return to main menu
+            Debug.LogWarning($"Good ending scene '{goodEndingSceneName}' not found! Showing message and returning to main menu.");
+            StartCoroutine(ShowEndingMessageAndReturnToMenu(true));
         }
     }
 
@@ -164,15 +177,110 @@ public class EndingManager : MonoBehaviour
         PlayerPrefs.SetInt("LastEndingWasGood", 0);
         PlayerPrefs.Save();
 
-        if (SceneManager.GetSceneByName(badEndingSceneName).IsValid())
+        // Check if the scene exists in build settings
+        bool sceneExists = false;
+        for (int i = 0; i < SceneManager.sceneCountInBuildSettings; i++)
+        {
+            string scenePath = SceneUtility.GetScenePathByBuildIndex(i);
+            string sceneName = System.IO.Path.GetFileNameWithoutExtension(scenePath);
+            if (sceneName == badEndingSceneName)
+            {
+                sceneExists = true;
+                break;
+            }
+        }
+
+        if (sceneExists)
         {
             SceneManager.LoadScene(badEndingSceneName);
         }
         else
         {
-            // Fallback to main menu
-            Debug.LogWarning($"Bad ending scene '{badEndingSceneName}' not found! Loading main menu.");
+            // Fallback: display ending message and return to main menu
+            Debug.LogWarning($"Bad ending scene '{badEndingSceneName}' not found! Showing message and returning to main menu.");
+            StartCoroutine(ShowEndingMessageAndReturnToMenu(false));
+        }
+    }
+
+    /// <summary>
+    /// Show ending message and return to main menu when ending scenes don't exist
+    /// </summary>
+    private IEnumerator ShowEndingMessageAndReturnToMenu(bool isGoodEnding)
+    {
+        // Create a temporary UI to show the ending message
+        GameObject tempCanvas = new GameObject("TempEndingCanvas");
+        Canvas canvas = tempCanvas.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 1000;
+        tempCanvas.AddComponent<CanvasScaler>();
+
+        // Create ending text
+        GameObject textObject = new GameObject("EndingText");
+        textObject.transform.SetParent(tempCanvas.transform, false);
+
+        var text = textObject.AddComponent<UnityEngine.UI.Text>();
+        text.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+        text.fontSize = 24;
+        text.color = Color.white;
+        text.alignment = TextAnchor.MiddleCenter;
+        text.text = isGoodEnding ?
+            "CONGRATULATIONS!\n\nYou reached 1000 currency!\nYou have achieved the good ending!" :
+            "GAME OVER\n\nYou didn't reach the goal of 1000 currency.\nBetter luck next time!";
+
+        // Set text position
+        RectTransform textRect = text.rectTransform;
+        textRect.anchorMin = Vector2.zero;
+        textRect.anchorMax = Vector2.one;
+        textRect.offsetMin = Vector2.zero;
+        textRect.offsetMax = Vector2.zero;
+
+        // Add background
+        GameObject backgroundObject = new GameObject("Background");
+        backgroundObject.transform.SetParent(tempCanvas.transform, false);
+        backgroundObject.transform.SetAsFirstSibling(); // Put behind text
+
+        var backgroundImage = backgroundObject.AddComponent<UnityEngine.UI.Image>();
+        backgroundImage.color = Color.black;
+
+        RectTransform backgroundRect = backgroundImage.rectTransform;
+        backgroundRect.anchorMin = Vector2.zero;
+        backgroundRect.anchorMax = Vector2.one;
+        backgroundRect.offsetMin = Vector2.zero;
+        backgroundRect.offsetMax = Vector2.zero;
+
+        // Show for 5 seconds
+        yield return new WaitForSeconds(5f);
+
+        // Clean up and return to main menu
+        Destroy(tempCanvas);
+
+        // Check if main menu scene exists
+        bool mainMenuExists = false;
+        for (int i = 0; i < SceneManager.sceneCountInBuildSettings; i++)
+        {
+            string scenePath = SceneUtility.GetScenePathByBuildIndex(i);
+            string sceneName = System.IO.Path.GetFileNameWithoutExtension(scenePath);
+            if (sceneName == mainMenuSceneName || sceneName == "MainMenu" || sceneName == "Menu")
+            {
+                mainMenuSceneName = sceneName;
+                mainMenuExists = true;
+                break;
+            }
+        }
+
+        if (mainMenuExists)
+        {
             SceneManager.LoadScene(mainMenuSceneName);
+        }
+        else
+        {
+            Debug.LogError("Main menu scene not found! Cannot return to menu.");
+            // Could restart the game or quit application here
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit();
+#endif
         }
     }
 

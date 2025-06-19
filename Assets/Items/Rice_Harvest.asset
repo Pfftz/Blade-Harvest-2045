@@ -13,4 +13,9 @@ MonoBehaviour:
   m_Name: Rice_Harvest
   m_EditorClassIdentifier: 
   itemName: Rice
-  icon: {fileID: -1777503850, guid: ed2ff86e51e032046ba5ed4387973a92, type: 3}
+  icon: {fileID: 1630670650, guid: a2388587df97614459a0e44f024b4110, type: 3}
+  description: Item description
+  buyPrice: 10
+  canBuy: 1
+  canSell: 1
+  category: 4

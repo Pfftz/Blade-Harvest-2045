@@ -6,11 +6,10 @@ public class RestaurantManager : MonoBehaviour
 
     [Header("Restaurant Settings")]
     [SerializeField] private int requiredPlantsForBonus = 3;
-    [SerializeField] private int restaurantBonus = 150;
-
-    [Header("Tracking")]
+    [SerializeField] private int restaurantBonus = 150; [Header("Tracking")]
     [SerializeField] private int plantsSubmittedToday = 0;
     [SerializeField] private bool hasReceivedRestaurantBonus = false;
+    [SerializeField] private bool qualifiedForBonusYesterday = false; // Track if player qualified yesterday
 
     // Events for UI updates
     public delegate void PlantSubmittedDelegate(int totalSubmitted);
@@ -30,18 +29,16 @@ public class RestaurantManager : MonoBehaviour
         instance = this;
         DontDestroyOnLoad(gameObject);
     }
-
     private void Start()
     {
-        // Reset daily tracking when starting the game
-        ResetDailyTracking();
-    }
-
-    /// <summary>
-    /// Call this method when a plant is sold/submitted
-    /// </summary>
-    /// <param name="itemName">Name of the item being sold</param>
-    /// <param name="quantity">Number of items being sold</param>
+        // Only reset daily tracking at game startup, not on scene transitions
+        // Scene transitions are handled by StartNewDay()
+        Debug.Log("RestaurantManager initialized");
+    }/// <summary>
+     /// Call this method when a plant is sold/submitted
+     /// </summary>
+     /// <param name="itemName">Name of the item being sold</param>
+     /// <param name="quantity">Number of items being sold</param>
     public void OnPlantSold(string itemName, int quantity)
     {
         // Check if the sold item is a plant (you can customize this logic)
@@ -53,19 +50,32 @@ public class RestaurantManager : MonoBehaviour
             // Trigger event for UI updates
             OnPlantSubmitted?.Invoke(plantsSubmittedToday);
 
-            // Check if we should award restaurant bonus
-            CheckRestaurantBonus();
+            // Just check if qualified, but don't award bonus yet
+            if (plantsSubmittedToday >= requiredPlantsForBonus)
+            {
+                Debug.Log($"Player has submitted {plantsSubmittedToday} plants - qualified for restaurant bonus tomorrow!");
+            }
         }
-    }
-
-    /// <summary>
-    /// Check if the player qualifies for restaurant bonus and award it
-    /// </summary>
+    }    /// <summary>
+         /// Check if the player qualifies for restaurant bonus and award it
+         /// </summary>
     private void CheckRestaurantBonus()
     {
         if (!hasReceivedRestaurantBonus && plantsSubmittedToday >= requiredPlantsForBonus)
         {
             AwardRestaurantBonus();
+        }
+    }
+
+    /// <summary>
+    /// Check if player qualified yesterday and award the bonus
+    /// </summary>
+    private void CheckAndAwardPendingBonus()
+    {
+        if (qualifiedForBonusYesterday && !hasReceivedRestaurantBonus)
+        {
+            AwardRestaurantBonus();
+            qualifiedForBonusYesterday = false; // Reset after awarding
         }
     }
 
@@ -116,15 +126,55 @@ public class RestaurantManager : MonoBehaviour
         }
 
         return false;
+    }    /// <summary>
+         /// Reset daily tracking (call this when a new day starts)
+         /// </summary>
+    public void ResetDailyTracking()
+    {        // Store whether player qualified for bonus before resetting
+        bool wasQualifiedForBonus = plantsSubmittedToday >= requiredPlantsForBonus;
+
+        // Only set the flag if player qualified but hasn't received bonus yet
+        // This prevents overwriting the flag during mid-game resets
+        if (wasQualifiedForBonus && !hasReceivedRestaurantBonus)
+        {
+            qualifiedForBonusYesterday = true;
+        }
+
+        // Reset daily counters
+        plantsSubmittedToday = 0;
+        hasReceivedRestaurantBonus = false; Debug.Log($"Restaurant tracking reset. Qualified for bonus yesterday: {qualifiedForBonusYesterday}");
     }
 
     /// <summary>
-    /// Reset daily tracking (call this when a new day starts)
+    /// Call this method at the start of a new day to handle restaurant bonus
     /// </summary>
-    public void ResetDailyTracking()
+    public void StartNewDay()
     {
+        Debug.Log("=== STARTING NEW DAY ===");
+
+        // First, check if player qualified yesterday based on current state
+        bool qualifiedYesterday = plantsSubmittedToday >= requiredPlantsForBonus;
+
+        Debug.Log($"Plants submitted yesterday: {plantsSubmittedToday}, Required: {requiredPlantsForBonus}, Qualified: {qualifiedYesterday}");
+
+        // Award bonus if qualified and hasn't received it yet
+        if (qualifiedYesterday && !hasReceivedRestaurantBonus)
+        {
+            Debug.Log("Player qualified for bonus yesterday, awarding now...");
+            AwardRestaurantBonus();
+        }
+        else if (qualifiedYesterday && hasReceivedRestaurantBonus)
+        {
+            Debug.Log("Player qualified yesterday but already received bonus");
+        }
+        else
+        {
+            Debug.Log("Player did not qualify for bonus yesterday");
+        }        // Now reset tracking for the new day
         plantsSubmittedToday = 0;
         hasReceivedRestaurantBonus = false;
+        qualifiedForBonusYesterday = false; // Reset after bonus is awarded
+
         Debug.Log("Restaurant tracking reset for new day");
     }
 
@@ -162,5 +212,14 @@ public class RestaurantManager : MonoBehaviour
     public bool HasReceivedRestaurantBonus()
     {
         return hasReceivedRestaurantBonus;
+    }
+
+    /// <summary>
+    /// Check if player qualified for bonus yesterday (useful for UI)
+    /// </summary>
+    /// <returns>True if qualified for bonus yesterday</returns>
+    public bool QualifiedForBonusYesterday()
+    {
+        return qualifiedForBonusYesterday;
     }
 }

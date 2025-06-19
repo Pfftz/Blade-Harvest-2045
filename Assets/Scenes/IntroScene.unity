@@ -247,7 +247,7 @@ GameObject:
   - component: {fileID: 158767319}
   - component: {fileID: 158767320}
   m_Layer: 0
-  m_Name: IntroManager
+  m_Name: CutsceneManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -277,12 +277,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 158767318}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c9a373cfd1d3e904daca007a156d88ec, type: 3}
+  m_Script: {fileID: 11500000, guid: 8fc14c21a857f6a40af792d613e7f249, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   cutsceneController: {fileID: 1549692955}
+  cutsceneType: 0
   nextSceneName: Day1
   delayBeforeSceneChange: 0
+  mainMenuSceneName: MainMenu
+  returnToMainMenuAfterEnding: 1
 --- !u!1 &183356950
 GameObject:
   m_ObjectHideFlags: 0

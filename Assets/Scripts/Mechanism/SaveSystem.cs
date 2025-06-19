@@ -5,12 +5,72 @@ using UnityEngine;
 [System.Serializable]
 public class GameSaveData
 {
-    public Dictionary<string, SceneTileData> tileDataByScene = new Dictionary<string, SceneTileData>();
-    public Dictionary<string, List<Player.InventorySlotData>> inventoryData = new Dictionary<string, List<Player.InventorySlotData>>();
+    // Use Lists instead of Dictionaries for proper JSON serialization
+    [System.Serializable]
+    public class SceneTileDataEntry
+    {
+        public string sceneName;
+        public SceneTileData tileData;
+    }
+
+    [System.Serializable]
+    public class InventoryDataEntry
+    {
+        public string sceneName;
+        public List<Player.InventorySlotData> inventorySlots;
+    }
+
+    public List<SceneTileDataEntry> tileDataByScene = new List<SceneTileDataEntry>();
+    public List<InventoryDataEntry> inventoryData = new List<InventoryDataEntry>();
     public int currentDay = 1;
     public string currentScene = "IntroScene"; // Track which scene the player is currently in
     public System.DateTime saveTime; // When the save was created
     public int playerCurrency = 0;
+
+    // Helper methods to access tile data like a dictionary
+    public SceneTileData GetTileDataForScene(string sceneName)
+    {
+        var entry = tileDataByScene.Find(e => e.sceneName == sceneName);
+        return entry?.tileData;
+    }
+
+    public void SetTileDataForScene(string sceneName, SceneTileData tileData)
+    {
+        var existingEntry = tileDataByScene.Find(e => e.sceneName == sceneName);
+        if (existingEntry != null)
+        {
+            existingEntry.tileData = tileData;
+        }
+        else
+        {
+            tileDataByScene.Add(new SceneTileDataEntry { sceneName = sceneName, tileData = tileData });
+        }
+    }
+
+    public bool HasTileDataForScene(string sceneName)
+    {
+        return tileDataByScene.Exists(e => e.sceneName == sceneName);
+    }
+
+    // Helper methods to access inventory data like a dictionary
+    public List<Player.InventorySlotData> GetInventoryDataForScene(string sceneName)
+    {
+        var entry = inventoryData.Find(e => e.sceneName == sceneName);
+        return entry?.inventorySlots;
+    }
+
+    public void SetInventoryDataForScene(string sceneName, List<Player.InventorySlotData> slots)
+    {
+        var existingEntry = inventoryData.Find(e => e.sceneName == sceneName);
+        if (existingEntry != null)
+        {
+            existingEntry.inventorySlots = slots;
+        }
+        else
+        {
+            inventoryData.Add(new InventoryDataEntry { sceneName = sceneName, inventorySlots = slots });
+        }
+    }
 }
 
 public static class SaveSystem

@@ -445,10 +445,13 @@ public class TileManager : MonoBehaviour
     // Add this method to be called externally
     public void SaveTileDataForCurrentScene()
     {
+        string currentScene = SceneManager.GetActiveScene().name;
+        Debug.Log($"SaveTileDataForCurrentScene called for {currentScene}. hasBeenSaved: {hasBeenSaved}");
+
         // Check if already saved or if interactableMap is null
         if (hasBeenSaved)
         {
-            Debug.Log("Tile data already saved for this scene");
+            Debug.Log("Tile data already saved for this scene - skipping duplicate save");
             return;
         }
 
@@ -458,16 +461,19 @@ public class TileManager : MonoBehaviour
             return;
         }
 
-        string currentScene = SceneManager.GetActiveScene().name;
         List<TileData> currentTileData = new List<TileData>();
+        int harvestTileCount = 0;
 
         try
         {
-            Debug.Log($"Saving tile data for scene: {currentScene}");
+            Debug.Log($"Starting tile data save for scene: {currentScene}");
 
             // Save all modified tiles
+            int totalTilesChecked = 0;
+            int tilesSkippedAsDefault = 0;
             foreach (var position in interactableMap.cellBounds.allPositionsWithin)
             {
+                totalTilesChecked++;
                 TileBase tile = interactableMap.GetTile(position);
                 if (tile != null)
                 {
@@ -494,6 +500,7 @@ public class TileManager : MonoBehaviour
                         // Debug log for harvest tiles
                         if (logicalTileName.Contains("Harvest"))
                         {
+                            harvestTileCount++;
                             Debug.Log($"Saving harvest tile: {logicalTileName} (actual: {actualTileName}) at {position} with phase {tileData.growthPhase}");
                         }
                         else if (actualTileName != logicalTileName)
@@ -501,8 +508,14 @@ public class TileManager : MonoBehaviour
                             Debug.Log($"Tile name mapping: {actualTileName} -> {logicalTileName} at {position}");
                         }
                     }
+                    else
+                    {
+                        tilesSkippedAsDefault++;
+                    }
                 }
             }
+
+            Debug.Log($"Tile scan summary - Checked: {totalTilesChecked}, Saved: {currentTileData.Count}, Skipped: {tilesSkippedAsDefault}, Harvest: {harvestTileCount}");
 
             // Store in static dictionary (old system)
             SceneTileData sceneData = new SceneTileData
@@ -515,12 +528,12 @@ public class TileManager : MonoBehaviour
             // NEW: Also save to GameManager's new SaveSystem
             if (GameManager.instance != null && GameManager.instance.currentSaveData != null)
             {
-                GameManager.instance.currentSaveData.tileDataByScene[currentScene] = sceneData;
+                GameManager.instance.currentSaveData.SetTileDataForScene(currentScene, sceneData);
                 Debug.Log($"Tile data also saved to new SaveSystem for scene: {currentScene}");
             }
 
             hasBeenSaved = true; // Mark as saved
-            Debug.Log($"Saved {currentTileData.Count} tiles for scene {currentScene}");
+            Debug.Log($"Saved {currentTileData.Count} tiles for scene {currentScene} (including {harvestTileCount} harvest tiles)");
         }
         catch (System.Exception e)
         {
@@ -544,11 +557,11 @@ public class TileManager : MonoBehaviour
         if (GameManager.instance != null && GameManager.instance.currentSaveData != null)
         {
             var saveData = GameManager.instance.currentSaveData;
-            if (saveData.tileDataByScene.ContainsKey(currentScene))
+            if (saveData.HasTileDataForScene(currentScene))
             {
                 Debug.Log($"Loading tile data from new SaveSystem for scene: {currentScene}");
                 // Convert from new save format to old format and load
-                SceneTileData sceneData = saveData.tileDataByScene[currentScene];
+                SceneTileData sceneData = saveData.GetTileDataForScene(currentScene);
                 savedTileDataByScene[currentScene] = sceneData;
                 LoadSceneData(currentScene);
                 return;
@@ -565,40 +578,56 @@ public class TileManager : MonoBehaviour
 
         // If no data for current scene, try to carry forward from previous day
         string previousScene = GetPreviousSceneName(currentScene);
-        if (!string.IsNullOrEmpty(previousScene) && savedTileDataByScene.ContainsKey(previousScene))
+        if (!string.IsNullOrEmpty(previousScene))
         {
-            Debug.Log($"No data for {currentScene}, carrying forward from {previousScene}");
-
-            // Copy previous day's data to current day
-            SceneTileData previousData = savedTileDataByScene[previousScene];
-            SceneTileData currentData = new SceneTileData
+            // Check new save system first for previous scene data
+            SceneTileData previousData = null;
+            if (GameManager.instance?.currentSaveData != null && GameManager.instance.currentSaveData.HasTileDataForScene(previousScene))
             {
-                sceneName = currentScene,
-                tiles = new List<TileData>(previousData.tiles) // Create a copy
-            };
-
-            // Update scene name in the copied data
-            foreach (TileData tile in currentData.tiles)
+                previousData = GameManager.instance.currentSaveData.GetTileDataForScene(previousScene);
+                Debug.Log($"Found previous scene data in new SaveSystem: {previousScene}");
+            }
+            // Fall back to old save system
+            else if (savedTileDataByScene.ContainsKey(previousScene))
             {
-                // Advance plant growth by 1 phase for the new day (plants grow overnight)
-                // BUT don't advance if already at harvest phase (5)
-                if (!string.IsNullOrEmpty(tile.plantedSeed) && tile.growthPhase < 5)
-                {
-                    tile.growthPhase++;
-                    // Update tile name to match new growth phase
-                    tile.tileName = GetTileNameForGrowthPhase(tile.plantedSeed, tile.growthPhase);
-                }
-                // If already at harvest phase (5), keep it at harvest phase
-                else if (tile.growthPhase == 5)
-                {
-                    // Keep harvest tiles as they are - don't advance further
-                    Debug.Log($"Keeping harvest tile {tile.tileName} at phase {tile.growthPhase} (no advancement)");
-                }
+                previousData = savedTileDataByScene[previousScene];
+                Debug.Log($"Found previous scene data in old save system: {previousScene}");
             }
 
-            savedTileDataByScene[currentScene] = currentData;
-            LoadSceneData(currentScene);
-            return;
+            if (previousData != null)
+            {
+                Debug.Log($"No data for {currentScene}, carrying forward from {previousScene}");
+
+                // Copy previous day's data to current day
+                SceneTileData currentData = new SceneTileData
+                {
+                    sceneName = currentScene,
+                    tiles = new List<TileData>(previousData.tiles) // Create a copy
+                };
+
+                // Update scene name in the copied data
+                foreach (TileData tile in currentData.tiles)
+                {
+                    // Advance plant growth by 1 phase for the new day (plants grow overnight)
+                    // BUT don't advance if already at harvest phase (5)
+                    if (!string.IsNullOrEmpty(tile.plantedSeed) && tile.growthPhase < 5)
+                    {
+                        tile.growthPhase++;
+                        // Update tile name to match new growth phase
+                        tile.tileName = GetTileNameForGrowthPhase(tile.plantedSeed, tile.growthPhase);
+                    }
+                    // If already at harvest phase (5), keep it at harvest phase
+                    else if (tile.growthPhase == 5)
+                    {
+                        // Keep harvest tiles as they are - don't advance further
+                        Debug.Log($"Keeping harvest tile {tile.tileName} at phase {tile.growthPhase} (no advancement)");
+                    }
+                }
+
+                savedTileDataByScene[currentScene] = currentData;
+                LoadSceneData(currentScene);
+                return;
+            }
         }
 
         Debug.Log($"No saved data found for scene {currentScene} or previous scenes");
@@ -989,9 +1018,9 @@ public class TileManager : MonoBehaviour
         }
 
         // Check GameManager save data
-        if (GameManager.instance?.currentSaveData?.tileDataByScene.ContainsKey(currentScene) == true)
+        if (GameManager.instance?.currentSaveData?.HasTileDataForScene(currentScene) == true)
         {
-            var gameManagerData = GameManager.instance.currentSaveData.tileDataByScene[currentScene];
+            var gameManagerData = GameManager.instance.currentSaveData.GetTileDataForScene(currentScene);
             int harvestCount = 0;
             foreach (var tile in gameManagerData.tiles)
             {
@@ -1045,9 +1074,9 @@ public class TileManager : MonoBehaviour
         string currentScene = SceneManager.GetActiveScene().name;
 
         // Fix GameManager save data
-        if (GameManager.instance?.currentSaveData?.tileDataByScene.ContainsKey(currentScene) == true)
+        if (GameManager.instance?.currentSaveData?.HasTileDataForScene(currentScene) == true)
         {
-            var tileData = GameManager.instance.currentSaveData.tileDataByScene[currentScene];
+            var tileData = GameManager.instance.currentSaveData.GetTileDataForScene(currentScene);
             int fixedCount = 0;
 
             for (int i = 0; i < tileData.tiles.Count; i++)
@@ -1083,17 +1112,86 @@ public class TileManager : MonoBehaviour
         }
     }
 
-    // Helper method to check if a tile name is a logical name we recognize
+    // Public method to reset save flag for debugging/forcing saves
+    public void ResetSaveFlag()
+    {
+        hasBeenSaved = false;
+        Debug.Log("TileManager: hasBeenSaved flag reset - can save again");
+    }
+
+    // Debug method to display current save data
+    public void DebugCurrentSaveData()
+    {
+        if (GameManager.instance?.currentSaveData == null)
+        {
+            Debug.Log("[DEBUG] No GameManager save data available");
+            return;
+        }
+
+        string currentScene = SceneManager.GetActiveScene().name;
+        Debug.Log($"[DEBUG] Checking save data for scene: {currentScene}");
+
+        if (GameManager.instance.currentSaveData.HasTileDataForScene(currentScene))
+        {
+            var tileData = GameManager.instance.currentSaveData.GetTileDataForScene(currentScene);
+            int totalTiles = tileData.tiles.Count;
+            int harvestTiles = 0;
+
+            foreach (var tile in tileData.tiles)
+            {
+                if (tile.tileName.Contains("Harvest"))
+                {
+                    harvestTiles++;
+                    Debug.Log($"[DEBUG] Harvest tile found: {tile.tileName} at {tile.position} phase {tile.growthPhase}");
+                }
+            }
+
+            Debug.Log($"[DEBUG] Scene {currentScene} has {totalTiles} total tiles, {harvestTiles} harvest tiles");
+        }
+        else
+        {
+            Debug.Log($"[DEBUG] No tile data found for scene {currentScene}");
+        }
+    }
+
+    // Helper method to check if a tile name is a valid logical tile name
     private bool IsLogicalTileName(string tileName)
     {
-        string[] knownLogicalNames = {
-            "Plowed",
-            "TomatoSeeding", "TomatoPhase1", "TomatoPhase2", "TomatoPhase3", "TomatoPhase4", "TomatoHarvest",
-            "RiceSeeding", "RicePhase1", "RicePhase2", "RicePhase3", "RicePhase4", "RiceHarvest",
-            "CucumberSeeding", "CucumberPhase1", "CucumberPhase2", "CucumberPhase3", "CucumberPhase4", "CucumberHarvest",
-            "CabbageSeeding", "CabbagePhase1", "CabbagePhase2", "CabbagePhase3", "CabbagePhase4", "CabbageHarvest"
-        };
+        if (string.IsNullOrEmpty(tileName))
+            return false;
 
-        return System.Array.Exists(knownLogicalNames, name => name == tileName);
+        // Check against all valid logical tile names
+        switch (tileName)
+        {
+            case "Plowed":
+            case "Interactable":
+            case "TomatoSeeding":
+            case "TomatoPhase1":
+            case "TomatoPhase2":
+            case "TomatoPhase3":
+            case "TomatoPhase4":
+            case "TomatoHarvest":
+            case "RiceSeeding":
+            case "RicePhase1":
+            case "RicePhase2":
+            case "RicePhase3":
+            case "RicePhase4":
+            case "RiceHarvest":
+            case "CucumberSeeding":
+            case "CucumberPhase1":
+            case "CucumberPhase2":
+            case "CucumberPhase3":
+            case "CucumberPhase4":
+            case "CucumberHarvest":
+            case "CabbageSeeding":
+            case "CabbagePhase1":
+            case "CabbagePhase2":
+            case "CabbagePhase3":
+            case "CabbagePhase4":
+            case "CabbageHarvest":
+                return true;
+            default:
+                return false;
+        }
     }
 }

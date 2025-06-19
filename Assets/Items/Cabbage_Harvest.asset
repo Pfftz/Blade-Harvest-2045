@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Cabbage_Harvest
   m_EditorClassIdentifier: 
   itemName: Cabbage
-  icon: {fileID: -348241695, guid: ed2ff86e51e032046ba5ed4387973a92, type: 3}
+  icon: {fileID: -109900264, guid: d9cbb935a784abc4da74243927f08227, type: 3}
   description: Kubis segar yang baru dipanen
   buyPrice: 10
   canBuy: 1

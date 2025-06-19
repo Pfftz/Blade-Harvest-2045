@@ -13,4 +13,9 @@ MonoBehaviour:
   m_Name: Rice_Seeds
   m_EditorClassIdentifier: 
   itemName: RiceSeed
-  icon: {fileID: 1886418207, guid: bcdf668a522ba364ca177c560f24e051, type: 3}
+  icon: {fileID: 1209158105, guid: a2388587df97614459a0e44f024b4110, type: 3}
+  description: Item description
+  buyPrice: 10
+  canBuy: 1
+  canSell: 1
+  category: 4

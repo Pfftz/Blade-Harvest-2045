@@ -10,10 +10,39 @@ public class Inventory_UI : MonoBehaviour
 
     [SerializeField] private Canvas canvas; // Reference to the canvas for UI elements
     private Inventory inventory;
+    private Slots_UI currentSelectedSlot; // Track currently selected slot
 
     private void Awake()
     {
-        canvas = FindObjectOfType<Canvas>();
+        // Find canvas for drag functionality - prioritize main canvas or overlay canvas
+        canvas = GameObject.Find("Canvas")?.GetComponent<Canvas>();
+        if (canvas == null)
+        {
+            canvas = GameObject.Find("HUD")?.GetComponent<Canvas>();
+        }
+        if (canvas == null)
+        {
+            // Fallback to any canvas with highest sort order (typically overlay)
+            Canvas[] canvases = FindObjectsOfType<Canvas>();
+            int highestSortOrder = -1;
+            foreach (Canvas c in canvases)
+            {
+                if (c.sortingOrder > highestSortOrder)
+                {
+                    highestSortOrder = c.sortingOrder;
+                    canvas = c;
+                }
+            }
+        }
+
+        if (canvas == null)
+        {
+            Debug.LogError("No Canvas found for Inventory drag functionality!");
+        }
+        else
+        {
+            Debug.Log($"Canvas found for Inventory: {canvas.name}, Sort Order: {canvas.sortingOrder}");
+        }
     }
 
     void Start()
@@ -130,13 +159,13 @@ public class Inventory_UI : MonoBehaviour
         if (UI_Manager.draggedSlot == null)
         {
             // Don't show warning if we're in a shop context - this is normal behavior
-            if (ShopManager.instance != null && 
+            if (ShopManager.instance != null &&
                 ShopManager.instance.gameObject.activeInHierarchy)
             {
                 // Shop is active, this is probably a shop interaction, not an error
                 return;
             }
-            
+
             Debug.LogWarning("No dragged slot to remove");
             return;
         }
@@ -209,7 +238,6 @@ public class Inventory_UI : MonoBehaviour
             UI_Manager.draggedIcon.gameObject.SetActive(false);
         }
     }
-
     public void SlotBeginDrag(Slots_UI slot)
     {
         if (slot == null) return;
@@ -224,13 +252,39 @@ public class Inventory_UI : MonoBehaviour
         }
 
         UI_Manager.draggedSlot = slot;
-        UI_Manager.draggedIcon = Instantiate(slot.itemIcon);
-        UI_Manager.draggedIcon.transform.SetParent(canvas.transform);
-        UI_Manager.draggedIcon.raycastTarget = false;
-        UI_Manager.draggedIcon.rectTransform.sizeDelta = new Vector2(50, 50);
 
-        MoveToMousePosition(UI_Manager.draggedIcon.gameObject);
-        Debug.Log("Start Drag: " + UI_Manager.draggedSlot.name);
+        // Enhanced drag icon creation to prevent disappearing
+        if (slot.itemIcon != null && slot.itemIcon.sprite != null)
+        {
+            // Create a new GameObject for the drag icon instead of just duplicating the Image component
+            GameObject dragIconGO = new GameObject("DragIcon");
+            UI_Manager.draggedIcon = dragIconGO.AddComponent<Image>();
+            UI_Manager.draggedIcon.sprite = slot.itemIcon.sprite;
+            UI_Manager.draggedIcon.color = slot.itemIcon.color;
+
+            // Ensure proper parenting and layer setup
+            if (canvas != null)
+            {
+                UI_Manager.draggedIcon.transform.SetParent(canvas.transform, false);
+                UI_Manager.draggedIcon.transform.SetAsLastSibling(); // Ensure it renders on top
+            }
+            else
+            {
+                Debug.LogError("Canvas is null - drag icon may not display correctly");
+            }
+
+            UI_Manager.draggedIcon.raycastTarget = false;
+            UI_Manager.draggedIcon.rectTransform.sizeDelta = new Vector2(50, 50);
+
+            // Set initial position
+            MoveToMousePosition(UI_Manager.draggedIcon.gameObject);
+
+            Debug.Log($"Start Drag: {UI_Manager.draggedSlot.name}, Icon: {UI_Manager.draggedIcon.sprite.name}");
+        }
+        else
+        {
+            Debug.LogError("Cannot create drag icon - slot icon or sprite is null");
+        }
     }
 
     public void SlotDrag()
@@ -275,5 +329,49 @@ public class Inventory_UI : MonoBehaviour
             );
             toMove.transform.position = canvas.transform.TransformPoint(position);
         }
+    }
+
+    public void SelectSlot(Slots_UI slot)
+    {
+        if (slot != null)
+        {
+            SelectSlot(slot.slotID);
+        }
+    }
+
+    public void SelectSlot(int index)
+    {
+        // Add bounds checking
+        if (slots == null || index < 0 || index >= slots.Count)
+        {
+            Debug.LogWarning($"Invalid slot index: {index} for inventory: {inventoryName}");
+            return;
+        }
+
+        // Deselect previous slot
+        if (currentSelectedSlot != null)
+        {
+            currentSelectedSlot.SetHighlight(false);
+        }
+
+        // Select new slot
+        currentSelectedSlot = slots[index];
+        currentSelectedSlot.SetHighlight(true);
+
+        Debug.Log($"Selected {inventoryName} slot {index}");
+    }
+
+    public void ClearSelection()
+    {
+        if (currentSelectedSlot != null)
+        {
+            currentSelectedSlot.SetHighlight(false);
+            currentSelectedSlot = null;
+        }
+    }
+
+    public Slots_UI GetSelectedSlot()
+    {
+        return currentSelectedSlot;
     }
 }

@@ -13,4 +13,9 @@ MonoBehaviour:
   m_Name: Tomato_Harvest
   m_EditorClassIdentifier: 
   itemName: Tomato
-  icon: {fileID: 1834024118, guid: ed2ff86e51e032046ba5ed4387973a92, type: 3}
+  icon: {fileID: -1753425133, guid: f0ecac6f9d799e247adca53b4c0e81ef, type: 3}
+  description: Item description
+  buyPrice: 10
+  canBuy: 1
+  canSell: 1
+  category: 4

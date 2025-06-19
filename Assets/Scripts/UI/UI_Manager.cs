@@ -49,6 +49,14 @@ public class UI_Manager : MonoBehaviour
             }
             else
             {
+                // Clear all selections when closing inventory
+                foreach (var kvp in inventoryUIByName)
+                {
+                    if (kvp.Value != null)
+                    {
+                        kvp.Value.ClearSelection();
+                    }
+                }
                 inventoryPanel.SetActive(false);
             }
         }
@@ -127,7 +135,7 @@ public class UI_Manager : MonoBehaviour
         if (inventoryPanel != null)
         {
             inventoryPanel.SetActive(show);
-            
+
             if (show)
             {
                 RefreshAll();

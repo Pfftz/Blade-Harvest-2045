@@ -131,9 +131,7 @@ public class Toolbar_UI : MonoBehaviour
 
             Debug.Log($"Selected toolbar slot {index}: {GameManager.instance.player.inventoryManager.toolbar.selectedSlot.itemName}");
         }
-    }
-
-    // Add drag functionality methods (similar to Inventory_UI)
+    }    // Add drag functionality methods (similar to Inventory_UI)
     public void SlotBeginDrag(Slots_UI slot)
     {
         if (slot == null) return;
@@ -148,13 +146,39 @@ public class Toolbar_UI : MonoBehaviour
         }
 
         UI_Manager.draggedSlot = slot;
-        UI_Manager.draggedIcon = Instantiate(slot.itemIcon);
-        UI_Manager.draggedIcon.transform.SetParent(canvas.transform);
-        UI_Manager.draggedIcon.raycastTarget = false;
-        UI_Manager.draggedIcon.rectTransform.sizeDelta = new Vector2(50, 50);
 
-        MoveToMousePosition(UI_Manager.draggedIcon.gameObject);
-        Debug.Log("Start Drag Toolbar: " + UI_Manager.draggedSlot.name);
+        // Enhanced drag icon creation to prevent disappearing
+        if (slot.itemIcon != null && slot.itemIcon.sprite != null)
+        {
+            // Create a new GameObject for the drag icon instead of just duplicating the Image component
+            GameObject dragIconGO = new GameObject("ToolbarDragIcon");
+            UI_Manager.draggedIcon = dragIconGO.AddComponent<Image>();
+            UI_Manager.draggedIcon.sprite = slot.itemIcon.sprite;
+            UI_Manager.draggedIcon.color = slot.itemIcon.color;
+
+            // Ensure proper parenting and layer setup
+            if (canvas != null)
+            {
+                UI_Manager.draggedIcon.transform.SetParent(canvas.transform, false);
+                UI_Manager.draggedIcon.transform.SetAsLastSibling(); // Ensure it renders on top
+            }
+            else
+            {
+                Debug.LogError("Canvas is null - toolbar drag icon may not display correctly");
+            }
+
+            UI_Manager.draggedIcon.raycastTarget = false;
+            UI_Manager.draggedIcon.rectTransform.sizeDelta = new Vector2(50, 50);
+
+            // Set initial position
+            MoveToMousePosition(UI_Manager.draggedIcon.gameObject);
+
+            Debug.Log($"Start Drag Toolbar: {UI_Manager.draggedSlot.name}, Icon: {UI_Manager.draggedIcon.sprite.name}");
+        }
+        else
+        {
+            Debug.LogError("Cannot create toolbar drag icon - slot icon or sprite is null");
+        }
     }
 
     public void SlotDrag()
