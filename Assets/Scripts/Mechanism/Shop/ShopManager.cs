@@ -9,12 +9,12 @@ public class ShopManager : MonoBehaviour
     [Header("Shop Items")]
     [SerializeField] private List<ItemData> shopInventory = new List<ItemData>();
     public List<ItemData> ShopInventory => shopInventory;
-    
+
     [Header("UI References")]
     [SerializeField] private Shop_UI shopUI;
 
     [Header("Settings")]
-    [SerializeField] private float sellValueMultiplier = 0.75f; 
+    [SerializeField] private float sellValueMultiplier = 0.75f;
 
     private void Awake()
     {
@@ -28,7 +28,8 @@ public class ShopManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
-    }    private void Start()
+    }
+    private void Start()
     {
         // Initialize the shop UI with available items
         if (shopUI != null)
@@ -92,10 +93,10 @@ public class ShopManager : MonoBehaviour
             shopUI.ShowNotification($"Bought {itemData.itemName} for {itemData.buyPrice} coins");
         else
             Debug.Log($"Bought {itemData.itemName} for {itemData.buyPrice} coins");
-        
+
         // Clear drag references again after successful purchase
         ClearDragReferences();
-        
+
         return true;
     }
 
@@ -103,6 +104,20 @@ public class ShopManager : MonoBehaviour
     public bool SellItem(string itemName, int quantity = 1)
     {
         if (string.IsNullOrEmpty(itemName)) return false;
+
+        if (IsToolItem(itemName))
+        {
+            // Show notification that tools can't be sold
+            if (shopUI != null && shopUI.gameObject.activeInHierarchy)
+            {
+                shopUI.ShowNotification("Tools cannot be sold!");
+            }
+            else
+            {
+                Debug.Log($"Cannot sell {itemName} - Tools are not sellable");
+            }
+            return false;
+        }
 
         // Find item data to get price
         ItemData itemData = GetItemDataByName(itemName);
@@ -119,7 +134,7 @@ public class ShopManager : MonoBehaviour
         if (CurrencyManager.instance != null)
         {
             CurrencyManager.instance.AddCurrency(totalValue);
-            
+
             // Only show notification if shop UI is active
             if (shopUI != null && shopUI.gameObject.activeInHierarchy)
             {
@@ -130,17 +145,18 @@ public class ShopManager : MonoBehaviour
                 // Alternative: Log to console or use a different notification system
                 Debug.Log($"Sold {quantity}x {itemName} for {totalValue} coins");
             }
-            
-            return true;        }
-        
+
+            return true;
+        }
+
         return false;
     }
 
     private bool CheckInventorySpace(Item item)
     {
-        if (item?.data == null || GameManager.instance?.player?.inventoryManager == null) 
+        if (item?.data == null || GameManager.instance?.player?.inventoryManager == null)
             return false;
-        
+
         // Check backpack first
         Inventory backpack = GameManager.instance.player.inventoryManager.GetInventoryByName("Backpack");
         if (backpack != null)
@@ -154,7 +170,7 @@ public class ShopManager : MonoBehaviour
                 }
             }
         }
-        
+
         return false;
     }
 
@@ -169,7 +185,7 @@ public class ShopManager : MonoBehaviour
         if (GameManager.instance?.player?.inventoryManager != null)
         {
             GameManager.instance.player.inventoryManager.Add("Backpack", item);
-            
+
             // Refresh UI
             if (GameManager.instance.uiManager != null)
             {
@@ -195,7 +211,7 @@ public class ShopManager : MonoBehaviour
         {
             UI_Manager.draggedSlot = null;
         }
-        
+
         if (UI_Manager.draggedIcon != null)
         {
             if (UI_Manager.draggedIcon.gameObject != null)
@@ -204,5 +220,19 @@ public class ShopManager : MonoBehaviour
             }
             UI_Manager.draggedIcon = null;
         }
+    }
+    
+    private bool IsToolItem(string itemName)
+    {
+        // Dapatkan ItemData dari nama item
+        ItemData itemData = GetItemDataByName(itemName);
+        
+        // Periksa apakah item tersebut ada dan kategorinya Tool
+        if (itemData != null && itemData.category == ItemData.ItemCategory.Tool)
+        {
+            return true;
+        }
+        
+        return false;
     }
 }

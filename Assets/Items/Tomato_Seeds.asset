@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemName: TomatoSeed
   icon: {fileID: 382121524, guid: f0ecac6f9d799e247adca53b4c0e81ef, type: 3}
-  description: Item description
+  description: Paket benih tomat, menghasilkan buah merah lezat. Cocok untuk kebun
+    rumah.
   buyPrice: 10
   canBuy: 1
   canSell: 1
-  category: 4
+  category: 0

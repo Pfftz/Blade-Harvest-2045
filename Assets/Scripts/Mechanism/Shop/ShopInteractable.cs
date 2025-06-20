@@ -34,7 +34,7 @@ public class ShopInteractable : MonoBehaviour
         
         ShowInteractPopup(false);
     }
-    
+
     private void Update()
     {
         if (isPlayerInRange && Input.GetKeyDown(interactionKey))
@@ -50,6 +50,12 @@ public class ShopInteractable : MonoBehaviour
                 CloseShop();
                 isShopOpen = false;
             }
+        }
+        
+        if (isShopOpen && Input.GetKeyDown(KeyCode.Tab))
+        {
+            CloseShop();
+            isShopOpen = false;
         }
     }
     

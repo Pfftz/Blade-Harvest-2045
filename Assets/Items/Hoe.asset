@@ -17,5 +17,5 @@ MonoBehaviour:
   description: Alat pertanian dasar untuk mencangkul tanah
   buyPrice: 10
   canBuy: 1
-  canSell: 1
-  category: 4
+  canSell: 0
+  category: 2

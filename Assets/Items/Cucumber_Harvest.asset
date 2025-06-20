@@ -18,4 +18,4 @@ MonoBehaviour:
   buyPrice: 10
   canBuy: 1
   canSell: 1
-  category: 4
+  category: 1
