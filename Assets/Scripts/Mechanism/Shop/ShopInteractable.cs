@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using System.Collections; 
 
 public class ShopInteractable : MonoBehaviour
 {
@@ -13,20 +14,21 @@ public class ShopInteractable : MonoBehaviour
     [SerializeField] private TextMeshProUGUI interactText;
     
     [Header("Shop References")]
-    [SerializeField] private Shop_UI shopUI;
-    
+    [SerializeField] private Shop_UI shopUI; 
+
+    [Header("Shop Mode for this NPC")]
+    [SerializeField] private Shop_UI.ShopMode npcShopMode; 
+
     private bool isPlayerInRange = false;
     private bool isShopOpen = false;
     
     private void Start()
     {
-        // Setup interact popup only if not assigned
         if (interactPopup == null || interactText == null)
         {
             SetupInteractPopup();
         }
         
-        // Set initial text if component exists
         if (interactText != null)
         {
             interactText.text = interactMessage;
@@ -42,7 +44,6 @@ public class ShopInteractable : MonoBehaviour
             if (!isShopOpen)
             {
                 OpenShop();
-                shopUI.InitializeShop(GameManager.instance.shopManager.ShopInventory);
                 isShopOpen = true;
             }
             else
@@ -63,7 +64,7 @@ public class ShopInteractable : MonoBehaviour
     {
         if (shopUI != null)
         {
-            shopUI.OpenShop();
+            shopUI.OpenShop(npcShopMode); 
             isShopOpen = true;
             if (interactText != null)
             {
@@ -76,8 +77,31 @@ public class ShopInteractable : MonoBehaviour
     {
         if (shopUI != null)
         {
-            shopUI.CloseShop();
-            isShopOpen = false;
+            // Menggunakan properti publik (ShopPanel, UseAnimations, AnimationDuration)
+            if (shopUI.UseAnimations) // <--- Perbaikan di sini
+            {
+                LeanTween.scale(shopUI.ShopPanel, new Vector3(0.1f, 0.1f, 0.1f), shopUI.AnimationDuration) // <--- Perbaikan di sini
+                    .setEase(LeanTweenType.easeInBack)
+                    .setOnComplete(() => {
+                        shopUI.ShopPanel.SetActive(false); // <--- Perbaikan di sini
+                        
+                        if (GameManager.instance?.uiManager != null)
+                        {
+                            GameManager.instance.uiManager.ShowInventory(false);
+                        }
+                    });
+            }
+            else
+            {
+                shopUI.ShopPanel.SetActive(false); // <--- Perbaikan di sini
+                
+                if (GameManager.instance?.uiManager != null)
+                {
+                    GameManager.instance.uiManager.ShowInventory(false);
+                }
+            }
+
+            isShopOpen = false; 
             if (interactText != null)
             {
                 interactText.text = interactMessage;
@@ -101,7 +125,6 @@ public class ShopInteractable : MonoBehaviour
             isPlayerInRange = false;
             ShowInteractPopup(false);
             
-            // Auto-close shop when player walks away
             if (isShopOpen)
             {
                 CloseShop();
@@ -111,40 +134,32 @@ public class ShopInteractable : MonoBehaviour
     
     private void SetupInteractPopup()
     {
-        // Create interact popup if not assigned (fallback)
         if (interactPopup == null)
         {
-            // Create popup GameObject
             interactPopup = new GameObject("InteractPopup");
             interactPopup.transform.SetParent(transform);
             interactPopup.transform.localPosition = Vector3.up * 1.5f;
             
-            // Add Canvas component for world space UI
             Canvas canvas = interactPopup.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.WorldSpace;
             canvas.sortingOrder = 10;
             
-            // Scale down the canvas
             interactPopup.transform.localScale = Vector3.one * 0.01f;
             
-            // Create text GameObject
             GameObject textGO = new GameObject("InteractText");
             textGO.transform.SetParent(interactPopup.transform);
             textGO.transform.localPosition = Vector3.zero;
             
-            // Add TextMeshPro component
             interactText = textGO.AddComponent<TextMeshProUGUI>();
             interactText.text = interactMessage;
             interactText.fontSize = 24;
             interactText.color = Color.white;
             interactText.alignment = TextAlignmentOptions.Center;
             
-            // Setup RectTransform
             RectTransform rectTransform = textGO.GetComponent<RectTransform>();
             rectTransform.sizeDelta = new Vector2(200, 50);
         }
         
-        // Set text if component exists
         if (interactText != null)
         {
             interactText.text = interactMessage;

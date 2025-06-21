@@ -8,16 +8,21 @@ public class Shop_UI : MonoBehaviour
 {
     [Header("Main Panel")]
     [SerializeField] private GameObject shopPanel;
+    // PENTING: Tambahkan properti public untuk shopPanel agar bisa diakses dari luar
+    public GameObject ShopPanel => shopPanel; // <-- Perbaikan di sini
+
     [SerializeField] private TextMeshProUGUI shopTitleText;
-    
+
     [Header("Buy Section")]
     [SerializeField] private Transform itemListContainer;
     [SerializeField] private GameObject shopItemPrefab;
     [SerializeField] private ScrollRect itemScrollView;
+    [SerializeField] private GameObject buySectionGameObject;
 
     [Header("Sell Section")]
     [SerializeField] private GameObject sellZone;
     [SerializeField] private TextMeshProUGUI sellInstructionText;
+    [SerializeField] private GameObject sellSectionGameObject;
 
     [Header("Notifications")]
     [SerializeField] private GameObject notificationPanel;
@@ -25,22 +30,28 @@ public class Shop_UI : MonoBehaviour
     [SerializeField] private float notificationDuration = 2.5f;
 
     [Header("Animation")]
-    [SerializeField] private bool useAnimations = true;
-    [SerializeField] private float animationDuration = 0.3f;
+    [SerializeField] private bool useAnimations; // Tetap private field
+    // PENTING: Tambahkan properti public untuk useAnimations dan animationDuration
+    public bool UseAnimations => useAnimations; // <-- Perbaikan di sini
+    [SerializeField] private float animationDuration; // Tetap private field
+    public float AnimationDuration => animationDuration; // <-- Perbaikan di sini
 
     private List<GameObject> spawnedItems = new List<GameObject>();
-    
-    // Initialize the shop panel with available items
+
+    public enum ShopMode
+    {
+        Buy,
+        Sell
+    }
+    private ShopMode currentShopMode; 
+
     public void InitializeShop(List<ItemData> shopInventory)
     {
         ClearShopItems();
-        
         foreach (ItemData item in shopInventory)
         {
             AddShopItem(item);
         }
-        
-        // Reset scroll position to top
         if (itemScrollView != null)
         {
             itemScrollView.normalizedPosition = new Vector2(0, 1);
@@ -50,18 +61,15 @@ public class Shop_UI : MonoBehaviour
     private void AddShopItem(ItemData item)
     {
         if (itemListContainer == null || shopItemPrefab == null) return;
-        
         GameObject itemObj = Instantiate(shopItemPrefab, itemListContainer);
         ShopItem_UI shopItem = itemObj.GetComponent<ShopItem_UI>();
-        
         if (shopItem != null)
         {
             shopItem.Setup(item);
         }
-        
         spawnedItems.Add(itemObj);
     }
-    
+
     private void ClearShopItems()
     {
         foreach (GameObject item in spawnedItems)
@@ -71,44 +79,38 @@ public class Shop_UI : MonoBehaviour
         spawnedItems.Clear();
     }
 
-    // Open the shop panel
-    public void OpenShop()
+    public void OpenShop(ShopMode mode)
     {
         if (shopPanel != null)
         {
             shopPanel.SetActive(true);
-            
-            // Open inventory too
             if (GameManager.instance?.uiManager != null)
             {
                 GameManager.instance.uiManager.ShowInventory(true);
             }
-            
             if (useAnimations)
             {
-                // Animation for opening
                 Transform panelTransform = shopPanel.transform;
                 panelTransform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
                 LeanTween.scale(shopPanel, Vector3.one, animationDuration)
                     .setEase(LeanTweenType.easeOutBack);
             }
+            SetShopMode(mode); 
         }
     }
 
-    // Close the shop panel
     public void CloseShop()
     {
+        // Perhatikan: Dalam metode ini, akses langsung ke 'shopPanel' masih OK karena Anda berada di dalam script yang sama.
+        // Tapi di ShopInteractable, kita harus pakai 'ShopPanel' yang public.
         if (shopPanel != null)
         {
             if (useAnimations)
             {
-                // Animation for closing
                 LeanTween.scale(shopPanel, new Vector3(0.1f, 0.1f, 0.1f), animationDuration)
                     .setEase(LeanTweenType.easeInBack)
                     .setOnComplete(() => {
                         shopPanel.SetActive(false);
-                        
-                        // Close inventory too
                         if (GameManager.instance?.uiManager != null)
                         {
                             GameManager.instance.uiManager.ShowInventory(false);
@@ -118,8 +120,6 @@ public class Shop_UI : MonoBehaviour
             else
             {
                 shopPanel.SetActive(false);
-                
-                // Close inventory too
                 if (GameManager.instance?.uiManager != null)
                 {
                     GameManager.instance.uiManager.ShowInventory(false);
@@ -128,31 +128,64 @@ public class Shop_UI : MonoBehaviour
         }
     }
 
-    // Show notification message
     public void ShowNotification(string message)
     {
         if (notificationPanel == null || notificationText == null) return;
-        
-        // Stop any existing notification coroutine
         StopAllCoroutines();
-        
-        // Set the notification text
         notificationText.text = message;
-        
-        // Show the notification
         notificationPanel.SetActive(true);
-        
-        // Hide after delay
         StartCoroutine(HideNotificationAfterDelay());
     }
-    
+
     private IEnumerator HideNotificationAfterDelay()
     {
         yield return new WaitForSeconds(notificationDuration);
-        
         if (notificationPanel != null)
         {
             notificationPanel.SetActive(false);
         }
+    }
+
+    public void SetShopMode(ShopMode mode)
+    {
+        currentShopMode = mode; 
+        if (buySectionGameObject != null)
+        {
+            buySectionGameObject.SetActive(mode == ShopMode.Buy);
+        }
+        else
+        {
+            Debug.LogWarning("Buy Section GameObject not assigned in Shop_UI!");
+        }
+        if (sellSectionGameObject != null)
+        {
+            sellSectionGameObject.SetActive(mode == ShopMode.Sell);
+        }
+        else
+        {
+            Debug.LogWarning("Sell Section GameObject not assigned in Shop_UI!");
+        }
+        if (shopTitleText != null)
+        {
+            if (mode == ShopMode.Buy)
+            {
+                shopTitleText.text = "Buy Items";
+                InitializeShop(GameManager.instance.shopManager.ShopInventory); 
+            }
+            else if (mode == ShopMode.Sell)
+            {
+                shopTitleText.text = "Sell Items";
+            }
+        }
+    }
+
+    public void ShowBuySection()
+    {
+        SetShopMode(ShopMode.Buy);
+    }
+
+    public void ShowSellSection()
+    {
+        SetShopMode(ShopMode.Sell);
     }
 }
