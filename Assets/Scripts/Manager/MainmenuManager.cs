@@ -64,6 +64,7 @@ public class MainmenuManager : MonoBehaviour
         newSaveData.currentDay = 1;
         newSaveData.currentScene = "IntroScene"; // Start with intro, but track Day1 as next
         newSaveData.saveTime = System.DateTime.Now;
+        newSaveData.playerCurrency = 150;
         SaveSystem.SaveGame(newSaveData);
         Debug.Log("New save file created for new game");
 

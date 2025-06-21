@@ -14,3 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemName: Shovel
   icon: {fileID: 21300000, guid: c8772e3d7641e7c4db202c54982e9963, type: 3}
+  description: Alat untuk mengembalikan tanah yang sudah di cangkul
+  buyPrice: 10
+  canBuy: 1
+  canSell: 0
+  category: 2
