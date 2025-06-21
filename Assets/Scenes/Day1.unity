@@ -3394,17 +3394,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   shopInventory:
-  - {fileID: 11400000, guid: 22191e2739bb31e40a86db943ae4d66d, type: 2}
   - {fileID: 11400000, guid: 9fe224feb9f8a2d429b629f520163c24, type: 2}
-  - {fileID: 11400000, guid: 23a1380896725184ea1b36d16251047e, type: 2}
   - {fileID: 11400000, guid: 9f29a62673cc4294f9ca74bc07d3f7be, type: 2}
-  - {fileID: 11400000, guid: f1da7cf7864ce1845b45a3b8677ee525, type: 2}
-  - {fileID: 11400000, guid: 9475709bb62135f46b785e2b36883268, type: 2}
-  - {fileID: 11400000, guid: 136246676cfa033459c41be98ca8a406, type: 2}
   - {fileID: 11400000, guid: addb47d81b19b874baf3c849abc72d72, type: 2}
-  - {fileID: 11400000, guid: d8fc4f2bbb2fbd140ac722b5c2f8d916, type: 2}
-  - {fileID: 11400000, guid: 4d946181e939ba14eb1549a8da9014ba, type: 2}
-  - {fileID: 11400000, guid: 7b2f635dc204b31419437712d9f7b474, type: 2}
   - {fileID: 11400000, guid: 796a3b2509a8a294c8429f066bfbdadd, type: 2}
   shopUI: {fileID: 857083353}
   sellValueMultiplier: 0.75
