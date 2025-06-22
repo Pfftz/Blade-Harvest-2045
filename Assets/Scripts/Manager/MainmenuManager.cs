@@ -150,6 +150,10 @@ public class MainmenuManager : MonoBehaviour
         {
             closeCreditsButton.interactable = true;
         });
+
+        var scrollScript = creditsPanel.GetComponentInChildren<AutoScrollCredits>();
+        scrollScript.enabled = false;
+        scrollScript.enabled = true;
     }
 
     public void CloseCredits()
