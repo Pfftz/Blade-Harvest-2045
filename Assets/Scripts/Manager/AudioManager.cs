@@ -1,86 +1,128 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using TMPro;
 
 public class AudioManager : MonoBehaviour
 {
     public static AudioManager instance { get; private set; }
 
+    [Header("Audio Sources")]
     private AudioSource soundSource;
     private AudioSource musicSource;
 
+    [Header("Background Music Clips")]
+    public AudioClip mainBGM;     // Untuk semua scene kecuali Intro
+    public AudioClip introBGM;    // Khusus untuk IntroScene
+
+    [Header("Sound Effects")]
+    public AudioClip walkSFX;
+    public AudioClip sleepSFX;
+    public AudioClip cutSFX;
+    public AudioClip talkfastSFX;
+
     private void Awake()
     {
-        // Get AudioSource components
-        soundSource = GetComponent<AudioSource>();
-
-        // Check if musicSource exists in a child GameObject
-        musicSource = transform.Find("MusicSource").GetComponent<AudioSource>();
-        if (musicSource == null)
-        {
-            Debug.LogError("No AudioSource found in children named 'MusicSource'.");
-        }
-
-        // Keep this object even when we go to new scene
+        // Singleton pattern
         if (instance == null)
         {
             instance = this;
-            DontDestroyOnLoad(gameObject);
+            DontDestroyOnLoad(gameObject); // Keep across scenes
         }
-        // Destroy duplicate gameobjects
-        else if (instance != null && instance != this)
+        else if (instance != this)
         {
             Destroy(gameObject);
+            return;
         }
 
-        // Check if volume preferences exist, otherwise set default values
-        if (!PlayerPrefs.HasKey("musicVolume"))
+        // Get or Add AudioSource
+        AudioSource[] sources = GetComponents<AudioSource>();
+        if (sources.Length < 2)
         {
-            PlayerPrefs.SetFloat("musicVolume", 0.5f);
+            soundSource = gameObject.AddComponent<AudioSource>();
+            musicSource = gameObject.AddComponent<AudioSource>();
         }
-        if (!PlayerPrefs.HasKey("soundVolume"))
+        else
         {
-            PlayerPrefs.SetFloat("soundVolume", 0.5f);
+            soundSource = sources[0];
+            musicSource = sources[1];
         }
 
-        // Assign initial volumes
-        ChangeMusicVolume(PlayerPrefs.GetFloat("musicVolume"));
-        ChangeSoundVolume(PlayerPrefs.GetFloat("soundVolume"));
+        musicSource.loop = true;
+
+        // Load volume settings
+        float musicVol = PlayerPrefs.GetFloat("musicVolume", 0.5f);
+        float soundVol = PlayerPrefs.GetFloat("soundVolume", 0.5f);
+        ChangeMusicVolume(musicVol);
+        ChangeSoundVolume(soundVol);
     }
 
-    public void PlaySound(AudioClip _sound)
+
+    public void PlayWalk() => PlaySound(walkSFX);
+    public void PlaySleep() => PlaySound(sleepSFX);
+    public void PlayCut() => PlaySound(cutSFX);
+    public void PlayTalkFast() => PlaySound(talkfastSFX);
+
+    private void OnEnable()
     {
-        soundSource.PlayOneShot(_sound);
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
-    public void PlayMusic(AudioClip _music, bool loop = false)
+    private void OnDisable()
     {
-        musicSource.clip = _music;
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // Cek apakah sudah memainkan musik yang sesuai, hindari tumpang tindih
+        if ((scene.name == "IntroScene" || scene.name == "BadEnding" || scene.name == "GoodEnding") && musicSource.clip != introBGM)
+        {
+            PlayMusic(introBGM, true);
+        }
+        else if (scene.name != "IntroScene" && scene.name != "BadEnding" && scene.name != "GoodEnding" && musicSource.clip != mainBGM)
+        {
+            PlayMusic(mainBGM, true);
+        }
+    }
+
+    // Main methods
+    public void PlaySound(AudioClip clip)
+    {
+        if (clip != null)
+            soundSource.PlayOneShot(clip);
+    }
+
+    public void PlayMusic(AudioClip music, bool loop = true)
+    {
+        if (music == null) return;
+
+        if (musicSource.clip == music && musicSource.isPlaying)
+            return;
+
+        musicSource.Stop();
+        musicSource.clip = music;
         musicSource.loop = loop;
         musicSource.Play();
     }
 
-    public void ChangeSoundVolume(float _change)
+    public void ChangeMusicVolume(float value)
     {
-        soundSource.volume = _change;
-        PlayerPrefs.SetFloat("soundVolume", _change);
+        musicSource.volume = value;
+        PlayerPrefs.SetFloat("musicVolume", value);
     }
 
-    public void ChangeMusicVolume(float _change)
+    public void ChangeSoundVolume(float value)
     {
-        musicSource.volume = _change;
-        PlayerPrefs.SetFloat("musicVolume", _change);
+        soundSource.volume = value;
+        PlayerPrefs.SetFloat("soundVolume", value);
     }
 
-    // Method to be called by the slider to set music volume
     public void SetMusicVolumeFromSlider(Slider slider)
     {
         ChangeMusicVolume(slider.value);
     }
 
-    // Method to be called by the slider to set sound (SFX) volume
     public void SetSoundVolumeFromSlider(Slider slider)
     {
         ChangeSoundVolume(slider.value);
@@ -92,13 +134,6 @@ public class AudioManager : MonoBehaviour
         ChangeSoundVolume(slider.value);
     }
 
-    public float GetMusicVolume()
-    {
-        return musicSource.volume;
-    }
-
-    public float GetSoundVolume()
-    {
-        return soundSource.volume;
-    }
+    public float GetMusicVolume() => musicSource.volume;
+    public float GetSoundVolume() => soundSource.volume;
 }
