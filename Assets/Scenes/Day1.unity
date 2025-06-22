@@ -2323,7 +2323,7 @@ MonoBehaviour:
   videoPlayer: {fileID: 0}
   videoDisplay: {fileID: 292626253}
   fadePanel: {fileID: 52460046}
-  sleepTransitionVideo: {fileID: 32900000, guid: e5b910102bac7514d85b1e6f8a2194b6, type: 3}
+  sleepTransitionVideo: {fileID: 32900000, guid: c335a3a3c47e7f14b9049e3f99f16bdc, type: 3}
   sleepAnimationSprites: []
   spriteAnimationSpeed: 0.2
   restaurantTransitionVideo: {fileID: 32900000, guid: 8c0ad0dfc8c2f6c4dbd88b24c245019f, type: 3}
@@ -3413,6 +3413,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentCurrency: 0
+  targetCurrency: 1000
 --- !u!1 &510463843
 GameObject:
   m_ObjectHideFlags: 0
@@ -3586,7 +3587,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -233.6, y: 82}
+  m_AnchoredPosition: {x: -298, y: 82}
   m_SizeDelta: {x: 60, y: 60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &515903690
@@ -4417,6 +4418,7 @@ GameObject:
   - component: {fileID: 591467423}
   - component: {fileID: 591467426}
   - component: {fileID: 591467427}
+  - component: {fileID: 591467428}
   m_Layer: 0
   m_Name: BuyNPC
   m_TagString: Untagged
@@ -4443,6 +4445,15 @@ MonoBehaviour:
   interactText: {fileID: 470511729}
   shopUI: {fileID: 857083353}
   npcShopMode: 0
+  cutsceneTrigger: {fileID: 591467428}
+  dialogueLinesDay1:
+  - hoi hoi hoi
+  - dungu
+  - ngawur cik
+  speakerNameDay1: Joko
+  dialogueLinesRepeat:
+  - Hai hai hai
+  speakerNameRepeat: Joko
 --- !u!212 &591467424
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -4553,6 +4564,31 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 1
+--- !u!114 &591467428
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 591467422}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a71abba9348affe4d9bcbe518e3db645, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isUsable: 0
+  interactionRange: 2
+  triggerSprite: {fileID: 0}
+  highlightColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  highlightIntensity: 1.2
+  interactPopup: {fileID: 746985171}
+  interactText: {fileID: 470511729}
+  interactMessage: Press E to Interact
+  cutsceneUI: {fileID: 424082513}
+  dialogueText: {fileID: 510463845}
+  speakerText: {fileID: 812112204}
+  continuePrompt: {fileID: 780045663}
+  textSpeed: 0.05
 --- !u!1001 &595774488
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7807,7 +7843,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 0, y: 82}
+  m_AnchoredPosition: {x: -41, y: 82}
   m_SizeDelta: {x: 0, y: 164}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1049594679
@@ -18338,8 +18374,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 60, y: 30}
-  m_SizeDelta: {x: 60, y: 30.4041}
+  m_AnchoredPosition: {x: 87.743515, y: 30}
+  m_SizeDelta: {x: 99.3033, y: 30.4041}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1884056675
 MonoBehaviour:
@@ -20136,6 +20172,8 @@ GameObject:
   - component: {fileID: 2093552166}
   - component: {fileID: 2093552165}
   - component: {fileID: 2093552164}
+  - component: {fileID: 2093552167}
+  - component: {fileID: 2093552168}
   m_Layer: 0
   m_Name: JokowiNPC
   m_TagString: CutsceneTrigger
@@ -20155,26 +20193,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a71abba9348affe4d9bcbe518e3db645, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isUsable: 1
+  isUsable: 0
   interactionRange: 2
-  oneTimeUse: 1
-  hasBeenUsed: 0
-  triggerSprite: {fileID: 0}
+  triggerSprite: {fileID: 2093552165}
   highlightColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   highlightIntensity: 1.2
   interactPopup: {fileID: 54012100}
   interactText: {fileID: 448462553}
   interactMessage: Press E to Interact
-  dialogueLines:
-  - jawa jawa jawa
-  - jawa jawa jawa
-  - wong ireng jemb
-  speakerName: Ahmad
-  textSpeed: 0.5
   cutsceneUI: {fileID: 424082513}
   dialogueText: {fileID: 510463845}
   speakerText: {fileID: 812112204}
   continuePrompt: {fileID: 780045663}
+  textSpeed: 0.05
 --- !u!212 &2093552165
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -20243,6 +20274,59 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!61 &2093552167
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2093552163}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 0.625, y: 0.75}
+    newSize: {x: 0.625, y: 0.75}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 0.625, y: 0.75}
+  m_EdgeRadius: 0
+--- !u!114 &2093552168
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2093552163}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 47e5c2e23a6fede48a8d2eb8126e623e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  speakerName: NPC
+  introDialogueLines:
+  - kontol nian
+  - mbud
+  farmingTips:
+  - 'gunakan senter untuk '
+  - test 2
+  combatTips:
+  - test 3
+  - test 4
+  generalTips:
+  - test 5
+  - test 6
+  showRandomTipsAfterIntro: 1
+  interactionKey: 101
 --- !u!1 &2094269426
 GameObject:
   m_ObjectHideFlags: 0
@@ -20361,6 +20445,8 @@ GameObject:
   - component: {fileID: 2106763213}
   - component: {fileID: 2106763212}
   - component: {fileID: 2106763211}
+  - component: {fileID: 2106763216}
+  - component: {fileID: 2106763217}
   m_Layer: 0
   m_Name: SellNPC
   m_TagString: Untagged
@@ -20401,7 +20487,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.5, y: 0.59375}
+    oldSize: {x: 0.52, y: 0.58}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -20425,10 +20511,19 @@ MonoBehaviour:
   interactionKey: 101
   interactMessage: Press E to Open Shop
   exitMessage: Press E to Close Shop
-  interactPopup: {fileID: 1100965419}
+  interactPopup: {fileID: 938738500}
   interactText: {fileID: 685275689}
   shopUI: {fileID: 857083353}
   npcShopMode: 1
+  cutsceneTrigger: {fileID: 2106763217}
+  dialogueLinesDay1:
+  - bls bla bla
+  - bli bli bli
+  - blu blu blu
+  speakerNameDay1: Waifu binti wife
+  dialogueLinesRepeat:
+  - hayoyoyo
+  speakerNameRepeat: Waifu binti wife
 --- !u!212 &2106763214
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -20470,7 +20565,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 1040794092, guid: 9b310f818768d544a8081831dc78b7a1, type: 3}
+  m_Sprite: {fileID: -1476961046, guid: c56d440491670924fbe5f001d06f9d08, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -20489,14 +20584,60 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2106763210}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 7.07, y: -2.61, z: 0}
-  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_LocalPosition: {x: 7.1909, y: -2.7448, z: 0}
+  m_LocalScale: {x: 2.4648, y: 2.4648, z: 2.4648}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 938738501}
   m_Father: {fileID: 0}
   m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!95 &2106763216
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2106763210}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 00904ec8f6e8408478af7bde45187562, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &2106763217
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2106763210}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a71abba9348affe4d9bcbe518e3db645, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isUsable: 1
+  interactionRange: 2
+  triggerSprite: {fileID: 0}
+  highlightColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  highlightIntensity: 1.2
+  interactPopup: {fileID: 938738500}
+  interactText: {fileID: 685275689}
+  interactMessage: Press E to Interact
+  cutsceneUI: {fileID: 424082513}
+  dialogueText: {fileID: 510463845}
+  speakerText: {fileID: 812112204}
+  continuePrompt: {fileID: 780045663}
+  textSpeed: 0.05
 --- !u!1001 &7198810687466987497
 PrefabInstance:
   m_ObjectHideFlags: 0

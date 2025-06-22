@@ -40,29 +40,32 @@ public class Currency_UI : MonoBehaviour
     }
 
     private void UpdateCurrencyDisplay(int newCurrency)
-    {
-        if (currencyText == null) return;
+{
+    if (currencyText == null) return;
 
-        // Update the display
-        currencyText.text = newCurrency.ToString();
-        
-        // Animate if enabled
-        if (animateCurrencyChanges)
+    // Get target currency
+    int targetCurrency = CurrencyManager.instance.GetTargetCurrency();
+    
+    // Format text to show current/target
+    currencyText.text = $"{newCurrency}/{targetCurrency}";
+    
+    // Animate if enabled
+    if (animateCurrencyChanges)
+    {
+        // Determine if this was an increase or decrease
+        if (newCurrency > previousCurrency)
         {
-            // Determine if this was an increase or decrease
-            if (newCurrency > previousCurrency)
-            {
-                AnimateCurrencyChange(true);
-            }
-            else if (newCurrency < previousCurrency)
-            {
-                AnimateCurrencyChange(false);
-            }
+            AnimateCurrencyChange(true);
         }
-        
-        // Store current value for next comparison
-        previousCurrency = newCurrency;
+        else if (newCurrency < previousCurrency)
+        {
+            AnimateCurrencyChange(false);
+        }
     }
+    
+    // Store current value for next comparison
+    previousCurrency = newCurrency;
+}
 
     private void AnimateCurrencyChange(bool isIncrease)
     {

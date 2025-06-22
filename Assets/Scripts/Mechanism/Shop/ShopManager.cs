@@ -14,7 +14,7 @@ public class ShopManager : MonoBehaviour
     [SerializeField] private Shop_UI shopUI;
 
     [Header("Settings")]
-    [SerializeField] private float sellValueMultiplier = 0.75f;
+    [SerializeField] private float sellValueMultiplier = 1f;
 
     private void Awake()
     {

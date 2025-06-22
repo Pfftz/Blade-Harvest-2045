@@ -15,7 +15,7 @@ MonoBehaviour:
   itemName: Cabbage
   icon: {fileID: -109900264, guid: d9cbb935a784abc4da74243927f08227, type: 3}
   description: Kubis segar yang baru dipanen
-  buyPrice: 10
-  canBuy: 1
+  buyPrice: 20
+  canBuy: 0
   canSell: 1
   category: 1
