@@ -11,20 +11,25 @@ public partial class Cutscenes
         {
             return new Cutscene() {
                 new ShowDialogAction(true),
-                new DialogAction("Welcome to Blade Harvest 2045..."),
-                new DialogAction("The year is 2045, and the world has changed forever."),
-                new DialogAction("You are one of the last farmers in a cyberpunk world."),
+                new DialogAction("Jakarta, 2045. Kota ini dikuasai 'THE ONE,' perusahaan makanan raksasa yang hanya menyisakan 'Maximum Processed Food'—biji-bijian hambar pengganti 'real food.'"),
+                new DialogAction("Abdul dan istrinya hidup dalam rutinitas monoton, menelan makanan tanpa rasa, di apartemen futuristik yang suram."),
+                new DialogAction("Masalah Abdul lebih dari sekadar makanan. Ia terjerat hutang warisan 1000 kredit pada 'Bank Riba Ilegal.'"),
+                new DialogAction("Gajinya sebagai buruh 'THE ONE' nyaris tak cukup. Bagaimana mungkin ia melunasi hutang ini di dunia yang hampa rasa? Keputusasaan mulai mencekik."),
+                new DialogAction("Namun, di tengah kemonotonan itu, sepercik ide gila melintas di benak Abdul. Membangkitkan 'real food'!"),
+                new DialogAction("Tomat segar, mentimun renyah, padi, kubis—rasa yang terlupakan! Sebuah ambisi nekat di era tanpa keaslian."),
+                new DialogAction("Dengan tekad membara, Abdul mengubah apartemennya jadi kebun rahasia. Istrinya, dengan 'Resep Nenek' di tangan, mulai memasak hidangan 'Pecel' yang legendaris."),
+                new DialogAction("Mereka melawan dominasi 'THE ONE,' satu per satu sayuran, satu per satu hidangan. Bisakah mereka memanen keberanian dan rasa di dunia yang hambar?"),
+                
+                // --- Bagian instruksi game ---
                 // Activate the Player object that's already on the canvas
                 new ActivateObjectAction("Player"),
-                new DialogAction("Your spaceship has landed on a remote farming colony."),
-                new DialogAction("Here, you must grow crops and survive using advanced farming technology."),
-                new DialogAction("Use your tools wisely - each action requires stamina."),
-                new DialogAction("Rest in your bed each night to restore your energy and advance to the next day."),
-                new DialogAction("Good luck, farmer. The future of agriculture depends on you!"),
+                new DialogAction("Gunakan alatmu bijak - setiap aksi butuh stamina."),
+                new DialogAction("Istirahat di ranjang setiap malam untuk pulihkan energi dan lanjut ke hari berikutnya."),
+                new DialogAction("Semoga berhasil, petani. Masa depan pangan ada di tanganmu!"),
                 new ShowDialogAction(false),
                 new WaitAction(1f),
-                // Deactivate the Player object
-                new DeactivateObjectAction("Player")
+                // Deactivate the Player object - Ini kemungkinan besar tidak diperlukan jika player sudah diaktifkan dan siap dimainkan.
+                new DeactivateObjectAction("Player") 
             };
         }
     }

@@ -5,7 +5,8 @@ public class CurrencyManager : MonoBehaviour
 {
     public static CurrencyManager instance;
 
-    [SerializeField] private int currentCurrency = 0;
+    [SerializeField] private int currentCurrency = 150;
+    [SerializeField] private int targetCurrency = 1000;
 
     // Event for currency changes
     public event Action<int> OnCurrencyChanged;
@@ -28,6 +29,18 @@ public class CurrencyManager : MonoBehaviour
     public int GetCurrentCurrency()
     {
         return currentCurrency;
+    }
+
+    // Get the target currency amount
+    public int GetTargetCurrency()
+    {
+        return targetCurrency;
+    }
+
+    public void SetTargetCurrency(int amount)
+    {
+        targetCurrency = amount;
+        OnCurrencyChanged?.Invoke(currentCurrency); // Trigger update
     }
 
     // Set currency to a specific value (used when loading save data)
