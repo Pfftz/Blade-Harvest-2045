@@ -441,4 +441,20 @@ public class GameManager : MonoBehaviour
     {
         RefreshManagerReferences();
     }
+
+    public void OnClick_Continue()
+    {
+    if (GameManager.instance != null)
+    {
+        GameManager.instance.TogglePause();
+    }
+    }
+
+    public void OnClick_Exit()
+    {
+        if (GameManager.instance != null)
+        {
+            GameManager.instance.ReturnToMainMenu();
+        }
+    }
 }

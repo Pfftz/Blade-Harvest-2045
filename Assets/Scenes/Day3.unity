@@ -1423,7 +1423,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 156962703}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 482948590}
+        m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
+        m_MethodName: OnClick_Continue
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &156962703
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4065,6 +4077,8 @@ MonoBehaviour:
   pausedPanel: {fileID: 984473461}
   movement: {fileID: 1325979513}
   currentSaveData:
+    tileDataByScene: []
+    inventoryData: []
     currentDay: 1
     currentScene: IntroScene
     playerCurrency: 0
@@ -6028,7 +6042,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 637546127}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 482948590}
+        m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
+        m_MethodName: OnClick_Exit
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &637546127
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11158,6 +11184,7 @@ MonoBehaviour:
   restaurantBonus: 150
   plantsSubmittedToday: 0
   hasReceivedRestaurantBonus: 0
+  qualifiedForBonusYesterday: 0
 --- !u!4 &1243149052
 Transform:
   m_ObjectHideFlags: 0
@@ -21407,10 +21434,9 @@ MonoBehaviour:
   interactText: {fileID: 448462553}
   interactMessage: Press E to Interact
   dialogueLines:
-  - jawa jawa jawa
-  - jawa jawa jawa
-  - wong ireng jemb
-  speakerName: Ahmad
+  - Masih semangat ternyata kamu
+  - Lanjutkan anak muda
+  speakerName: Wowo
   textSpeed: 0.5
   cutsceneUI: {fileID: 424082513}
   dialogueText: {fileID: 510463845}
