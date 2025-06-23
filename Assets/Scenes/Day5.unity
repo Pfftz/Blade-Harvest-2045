@@ -1308,7 +1308,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 156962703}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 482948590}
+        m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
+        m_MethodName: OnClick_Continue
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &156962703
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5363,7 +5375,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 637546127}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 482948590}
+        m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
+        m_MethodName: OnClick_Exit
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &637546127
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20339,6 +20363,10 @@ MonoBehaviour:
   interactPopup: {fileID: 54012100}
   interactText: {fileID: 448462553}
   interactMessage: Press E to Interact
+  dialogueLines:
+  - Semangat terus deh le
+  speakerName: Wowo
+  textSpeed: 0.5
   cutsceneUI: {fileID: 424082513}
   dialogueText: {fileID: 510463845}
   speakerText: {fileID: 812112204}
