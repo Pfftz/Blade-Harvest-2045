@@ -8,7 +8,7 @@ public class ShopInteractable : MonoBehaviour
     [SerializeField] private KeyCode interactionKey = KeyCode.E;
     [SerializeField] private string interactMessage = "Press E to Open Shop";
     [SerializeField] private string exitMessage = "Press E to Close Shop";
-    [SerializeField] private float interactionCooldown = 0.5f; // Cooldown baru
+    [SerializeField] private float interactionCooldown = 0.5f;
 
     [Header("UI Settings")]
     [SerializeField] private GameObject interactPopup;
@@ -32,22 +32,28 @@ public class ShopInteractable : MonoBehaviour
     private static bool hasCompletedShopTutorialDay1Sell = false;
 
     private bool isPlayerInRange = false;
-    private bool isShopOpen = false; // Status apakah UI toko (panel Buy/Sell) sedang terbuka
-    private bool isOnCooldown = false; // Flag baru untuk cooldown
+    private bool isShopOpen = false;
+    private bool isOnCooldown = false;
 
     private void Start()
     {
         if (interactPopup == null || interactText == null)
         {
-            SetupInteractPopup();
+            SetupInteractPopup(); // Pastikan popup dibuat jika belum ada di Inspector
         }
 
+        // Muat status tutorial dari PlayerPrefs saat Start
+        hasCompletedShopTutorialDay1Buy = PlayerPrefs.GetInt("ShopTutorialDay1Buy", 0) == 1;
+        hasCompletedShopTutorialDay1Sell = PlayerPrefs.GetInt("ShopTutorialDay1Sell", 0) == 1;
+        Debug.Log($"[ShopInteractable-{gameObject.name}] Loaded tutorial status: Buy={hasCompletedShopTutorialDay1Buy}, Sell={hasCompletedShopTutorialDay1Sell}");
+
+        // Inisialisasi teks popup default
         if (interactText != null)
         {
             interactText.text = interactMessage;
         }
 
-        ShowInteractPopup(false);
+        ShowInteractPopup(false); // Pastikan popup tersembunyi di awal
 
         if (cutsceneTrigger == null)
         {
@@ -56,57 +62,57 @@ public class ShopInteractable : MonoBehaviour
         else
         {
             cutsceneTrigger.SetCallbackObject(this.gameObject);
-            // Inisialisasi status usable CutsceneTrigger dari sini
-            bool shouldBeUsable = true;
+            
+            // Logika untuk mengatur isUsable di CutsceneTrigger:
+            // CT harus usable jika:
+            // 1. Tutorial belum selesai (untuk Day1 dialog)
+            // ATAU
+            // 2. Tutorial sudah selesai DAN ada dialog repeat (untuk dialog repeat)
+            bool shouldCutsceneBeUsableForDialogue = false;
             if (npcShopMode == Shop_UI.ShopMode.Buy)
             {
-                shouldBeUsable = !hasCompletedShopTutorialDay1Buy;
+                shouldCutsceneBeUsableForDialogue = !hasCompletedShopTutorialDay1Buy || (dialogueLinesRepeat != null && dialogueLinesRepeat.Length > 0);
             }
             else // Sell Mode
             {
-                shouldBeUsable = !hasCompletedShopTutorialDay1Sell;
+                shouldCutsceneBeUsableForDialogue = !hasCompletedShopTutorialDay1Sell || (dialogueLinesRepeat != null && dialogueLinesRepeat.Length > 0);
             }
-            cutsceneTrigger.SetUsableStatus(shouldBeUsable);
+            cutsceneTrigger.SetUsableStatus(shouldCutsceneBeUsableForDialogue);
+            Debug.Log($"[ShopInteractable-{gameObject.name}] CT.SetUsableStatus({shouldCutsceneBeUsableForDialogue}). CT.IsUsableInternal: {cutsceneTrigger.IsUsableInternal}");
         }
-
-        // Idealnya, muat status tutorial dari save game
-        // (Ini hanya contoh untuk test)
-        //PlayerPrefs.DeleteKey("ShopTutorialDay1Buy"); // Untuk testing
-        //PlayerPrefs.DeleteKey("ShopTutorialDay1Sell"); // Untuk testing
-        hasCompletedShopTutorialDay1Buy = PlayerPrefs.GetInt("ShopTutorialDay1Buy", 0) == 1;
-        hasCompletedShopTutorialDay1Sell = PlayerPrefs.GetInt("ShopTutorialDay1Sell", 0) == 1;
-
     }
 
     private void Update()
     {
-        // Menggunakan properti IsCutsceneActive dari CutsceneTrigger
         bool isCutsceneCurrentlyActive = (cutsceneTrigger != null && cutsceneTrigger.IsCutsceneActive);
 
-        // Tambahkan cek isOnCooldown di sini
         if (isPlayerInRange && Input.GetKeyDown(interactionKey) && !isOnCooldown)
         {
-            if (!isShopOpen && !isCutsceneCurrentlyActive) // Jika toko tidak terbuka DAN tidak ada cutscene aktif
+            StartCoroutine(StartCooldown()); // Mulai cooldown segera
+
+            if (isShopOpen) // Jika toko sudah terbuka
             {
-                StartCoroutine(StartCooldown()); // Mulai cooldown
-                HandleInteraction();
+                if (!isCutsceneCurrentlyActive) // Pastikan tidak ada cutscene aktif
+                {
+                    CloseShop();
+                }
             }
-            else if (isShopOpen && !isCutsceneCurrentlyActive) // Jika toko sudah terbuka DAN tidak ada cutscene aktif
+            else // Jika toko belum terbuka
             {
-                StartCoroutine(StartCooldown()); // Mulai cooldown
-                CloseShop();
+                if (!isCutsceneCurrentlyActive) // Pastikan tidak ada cutscene aktif
+                {
+                    HandleInteraction();
+                }
             }
-            // Jika ada cutscene aktif, input E akan ditangani oleh CutsceneTrigger itu sendiri untuk melanjutkan dialog.
         }
 
-        // Tutup toko dengan tombol Tab (jika toko terbuka dan tidak ada cutscene aktif)
         if (isShopOpen && Input.GetKeyDown(KeyCode.Tab) && !isCutsceneCurrentlyActive)
         {
             CloseShop();
         }
     }
 
-    private void HandleInteraction() // Metode yang akan memicu dialog atau langsung membuka toko
+    private void HandleInteraction()
     {
         if (cutsceneTrigger == null)
         {
@@ -125,7 +131,7 @@ public class ShopInteractable : MonoBehaviour
         {
             isDay1ForThisShop = !hasCompletedShopTutorialDay1Buy;
         }
-        else // Shop_UI.ShopMode.Sell
+        else
         {
             isDay1ForThisShop = !hasCompletedShopTutorialDay1Sell;
         }
@@ -137,40 +143,43 @@ public class ShopInteractable : MonoBehaviour
         }
         else
         {
-            if (dialogueLinesRepeat == null || dialogueLinesRepeat.Length == 0)
+            // Jika tutorial sudah selesai, gunakan dialog repeat
+            if (dialogueLinesRepeat != null && dialogueLinesRepeat.Length > 0)
             {
-                Debug.LogWarning("No repeat dialogue lines assigned for " + gameObject.name + ". Opening shop directly.");
+                int randomIndex = Random.Range(0, dialogueLinesRepeat.Length);
+                linesToDisplay = new string[] { dialogueLinesRepeat[randomIndex] };
+                speakerToDisplay = speakerNameRepeat;
+            }
+            else
+            {
+                // Jika tidak ada dialog repeat, langsung buka toko
+                Debug.Log($"[ShopInteractable-{gameObject.name}] No repeat dialogue lines assigned. Opening shop directly.");
                 OpenShopDirectly();
                 return;
             }
-            int randomIndex = Random.Range(0, dialogueLinesRepeat.Length);
-            linesToDisplay = new string[] { dialogueLinesRepeat[randomIndex] }; // Pastikan ini selalu 1 tips per interaksi
-            speakerToDisplay = speakerNameRepeat;
         }
 
         if (linesToDisplay == null || linesToDisplay.Length == 0)
         {
+            Debug.LogWarning($"[ShopInteractable-{gameObject.name}] Dialogue lines are empty. Opening shop directly.");
             OpenShopDirectly();
             return;
         }
 
         cutsceneTrigger.StartDialogue(linesToDisplay, speakerToDisplay, this.gameObject);
-        isShopOpen = true; // <--- PENTING: Set isShopOpen menjadi TRUE di sini
-                            // Ini menandakan bahwa alur toko/dialog sudah dimulai.
+        isShopOpen = true; // Menandakan alur toko/dialog sudah dimulai
     }
 
-    // Metode ini akan dipanggil oleh CutsceneTrigger setelah cutscene/dialog selesai
-    public void OnCutsceneEnd() // <--- Callback dari CutsceneTrigger
+    public void OnCutsceneEnd()
     {
-        Debug.Log("ShopInteractable: OnCutsceneEnd received.");
+        Debug.Log($"[ShopInteractable-{gameObject.name}] OnCutsceneEnd received. isShopOpen: {isShopOpen}");
 
-        if (isShopOpen) // Memeriksa isShopOpen agar tidak membuka toko jika sudah ditutup pemain
+        if (isShopOpen) // Hanya buka toko jika belum ditutup pemain
         {
-            Debug.Log("ShopInteractable: isShopOpen is TRUE. Proceeding to open shop directly.");
             OpenShopDirectly(); // Buka toko setelah dialog selesai
 
-            // Set status tutorial selesai untuk NPC ini (hanya jika tutorial Day 1)
-            bool isDay1ForThisShop = false; // Tentukan lagi apakah ini tutorial Day 1
+            // Tandai tutorial selesai jika ini adalah Day1 dan belum selesai
+            bool isDay1ForThisShop = false;
             if (npcShopMode == Shop_UI.ShopMode.Buy)
             {
                 isDay1ForThisShop = !hasCompletedShopTutorialDay1Buy;
@@ -185,72 +194,74 @@ public class ShopInteractable : MonoBehaviour
                 if (npcShopMode == Shop_UI.ShopMode.Buy)
                 {
                     hasCompletedShopTutorialDay1Buy = true;
-                    PlayerPrefs.SetInt("ShopTutorialDay1Buy", 1); // Simpan ke PlayerPrefs
+                    PlayerPrefs.SetInt("ShopTutorialDay1Buy", 1);
                 }
                 else
                 {
                     hasCompletedShopTutorialDay1Sell = true;
-                    PlayerPrefs.SetInt("ShopTutorialDay1Sell", 1); // Simpan ke PlayerPrefs
+                    PlayerPrefs.SetInt("ShopTutorialDay1Sell", 1);
                 }
-                PlayerPrefs.Save(); // Penting: Simpan perubahan PlayerPrefs
+                PlayerPrefs.Save();
+                Debug.Log($"[ShopInteractable-{gameObject.name}] ShopTutorial for {npcShopMode} completed and saved.");
 
-                // Setelah tutorial selesai, nonaktifkan CutsceneTrigger ini untuk dialog selanjutnya
-                // Atau, set ulang IsUsableInternal menjadi true jika ingin selalu bisa dialog repeat
+                // Setelah tutorial selesai, pastikan CutsceneTrigger tetap usable untuk interaksi di masa depan
+                // terutama jika ada dialog repeat atau hanya ingin popup muncul.
                 if (cutsceneTrigger != null)
                 {
-                    // Jika Anda ingin NPC tidak lagi menampilkan dialog tutorial setelah Day1,
-                    // dan hanya menampilkan UI Shop, maka SetUsableStatus(false) untuk dialognya.
-                    // Namun, jika dialogueLinesRepeat Anda ingin tetap diakses,
-                    // maka ini perlu logika yang lebih halus. Untuk saat ini, kita biarkan.
-                    // cutsceneTrigger.SetUsableStatus(false); // <-- Hati-hati dengan ini, jika Anda masih ingin dialog repeat
+                    bool shouldCutsceneBeUsableForDialogue = (dialogueLinesRepeat != null && dialogueLinesRepeat.Length > 0);
+                    cutsceneTrigger.SetUsableStatus(shouldCutsceneBeUsableForDialogue);
+                    Debug.Log($"[ShopInteractable-{gameObject.name}] CT.SetUsableStatus({shouldCutsceneBeUsableForDialogue}) after tutorial. Current CT.IsUsableInternal: {cutsceneTrigger.IsUsableInternal}");
                 }
             }
 
+            // Atur teks popup ke exitMessage jika pemain masih dalam jangkauan dan toko terbuka
             if (isPlayerInRange && interactText != null)
             {
                 interactText.text = exitMessage;
+                ShowInteractPopup(true); // Pastikan popup terlihat
             }
         }
-        else // Jika isShopOpen false (berarti pemain menutup toko/menjauh saat dialog aktif)
+        else // Jika isShopOpen false (pemain sudah menutup toko/menjauh saat dialog aktif)
         {
-            Debug.Log("ShopInteractable: isShopOpen is FALSE. NOT opening shop directly. Displaying popup again if in range.");
+            Debug.Log($"[ShopInteractable-{gameObject.name}] Shop was closed during cutscene. Not opening shop directly.");
             if (isPlayerInRange)
             {
-                ShowInteractPopup(true);
+                ShowInteractPopup(true); // Tampilkan popup lagi jika pemain masih dalam jangkauan
             }
         }
     }
 
-    private void OpenShopDirectly() // Metode ini sekarang hanya membuka UI toko
+    private void OpenShopDirectly()
     {
-        Debug.Log("ShopInteractable: Calling OpenShop on Shop_UI.");
+        Debug.Log($"[ShopInteractable-{gameObject.name}] Calling OpenShop on Shop_UI. Mode: {npcShopMode}");
         if (shopUI != null)
         {
-            shopUI.OpenShop(npcShopMode); // Memanggil OpenShop di Shop_UI dengan mode yang benar
+            shopUI.OpenShop(npcShopMode);
             if (interactText != null)
             {
                 interactText.text = exitMessage;
             }
-            isShopOpen = true; // Pastikan status ini diatur di sini
+            isShopOpen = true;
         }
         else
         {
-            Debug.LogWarning("ShopInteractable: shopUI reference is NULL in OpenShopDirectly!");
+            Debug.LogWarning($"[ShopInteractable-{gameObject.name}] shopUI reference is NULL in OpenShopDirectly!");
         }
     }
 
     private void CloseShop()
     {
-        Debug.Log("ShopInteractable: Closing shop.");
+        Debug.Log($"[ShopInteractable-{gameObject.name}] Closing shop. isShopOpen was: {isShopOpen}");
         if (shopUI != null)
         {
+            // ... (Kode animasi LeanTween tetap sama) ...
             if (shopUI.UseAnimations)
             {
                 LeanTween.scale(shopUI.ShopPanel, new Vector3(0.1f, 0.1f, 0.1f), shopUI.AnimationDuration)
                     .setEase(LeanTweenType.easeInBack)
-                    .setOnComplete(() => {
+                    .setOnComplete(() =>
+                    {
                         shopUI.ShopPanel.SetActive(false);
-
                         if (GameManager.instance?.uiManager != null)
                         {
                             GameManager.instance.uiManager.ShowInventory(false);
@@ -260,28 +271,40 @@ public class ShopInteractable : MonoBehaviour
             else
             {
                 shopUI.ShopPanel.SetActive(false);
-
                 if (GameManager.instance?.uiManager != null)
                 {
                     GameManager.instance.uiManager.ShowInventory(false);
                 }
             }
-
-            isShopOpen = false; // PENTING: Atur status toko ke tertutup di sini
+            
+            isShopOpen = false; // Set status toko ke tertutup di sini
+            
             if (interactText != null)
             {
-                // Kembalikan pesan ke "Press E to Open Shop" hanya jika CutsceneTrigger ini masih bisa digunakan untuk interaksi
-                // atau jika ini bukan tutorial Day 1 lagi (sudah selesai).
-                bool isUsableAfterClose = (cutsceneTrigger == null || cutsceneTrigger.IsUsableInternal);
-                if (npcShopMode == Shop_UI.ShopMode.Buy && hasCompletedShopTutorialDay1Buy) isUsableAfterClose = true;
-                if (npcShopMode == Shop_UI.ShopMode.Sell && hasCompletedShopTutorialDay1Sell) isUsableAfterClose = true;
-
-                if (isUsableAfterClose)
+                // Teks popup kembali ke pesan interaksi awal jika pemain masih dalam jangkauan
+                if (isPlayerInRange) // Hanya set teks jika pemain masih dalam jangkauan
                 {
-                    interactText.text = interactMessage;
-                } else {
-                    // Jika dialog tutorial one-time use, setelah selesai, popup interaksi mungkin tidak lagi relevan
-                    interactText.text = ""; // Sembunyikan pesan jika tidak lagi usable (misal: tutorial one-time use)
+                    // Tampilkan pesan "Open Shop" jika CutsceneTrigger masih bisa memicu dialog (repeat)
+                    // atau jika tutorial sudah selesai (artinya langsung buka toko)
+                    bool canReopenWithPopup = (cutsceneTrigger != null && cutsceneTrigger.IsUsableInternal) || 
+                                              (npcShopMode == Shop_UI.ShopMode.Buy && hasCompletedShopTutorialDay1Buy) || 
+                                              (npcShopMode == Shop_UI.ShopMode.Sell && hasCompletedShopTutorialDay1Sell);
+                    
+                    if (canReopenWithPopup)
+                    {
+                        interactText.text = interactMessage;
+                        ShowInteractPopup(true); // Pastikan popup aktif kembali
+                    }
+                    else
+                    {
+                        // Jika tidak lagi usable (misal one-time tutorial tanpa repeat dialog), sembunyikan popup
+                        interactText.text = ""; 
+                        ShowInteractPopup(false);
+                    }
+                }
+                else // Jika pemain tidak lagi dalam jangkauan, sembunyikan popup sepenuhnya
+                {
+                    ShowInteractPopup(false);
                 }
             }
         }
@@ -292,18 +315,42 @@ public class ShopInteractable : MonoBehaviour
         if (collision.CompareTag("Player"))
         {
             isPlayerInRange = true;
-            // Tampilkan popup interaksi hanya jika toko tidak aktif, tidak ada cutscene aktif,
-            // DAN CutsceneTrigger ini sendiri masih usable (untuk tutorial)
-            bool canShowPopup = (cutsceneTrigger == null || !cutsceneTrigger.IsCutsceneActive) &&
-                                (cutsceneTrigger == null || cutsceneTrigger.IsUsableInternal);
+            // Ini akan memuat ulang status dari PlayerPrefs setiap kali player masuk trigger
+            // Ini REDUNDAN jika Start() sudah memuatnya, tapi tidak merusak.
+            // Sebaiknya pastikan GameManager mengelola PlayerPrefs.Save() dan Load() di awal/akhir hari
+            // atau saat save game. Untuk sementara, ini tidak apa-apa.
+            hasCompletedShopTutorialDay1Buy = PlayerPrefs.GetInt("ShopTutorialDay1Buy", 0) == 1;
+            hasCompletedShopTutorialDay1Sell = PlayerPrefs.GetInt("ShopTutorialDay1Sell", 0) == 1;
 
-            if (!isShopOpen && canShowPopup)
+            // Logika untuk menampilkan popup:
+            // Popup harus muncul jika:
+            // 1. Toko tidak terbuka (isShopOpen == false)
+            // DAN
+            // 2. (CutsceneTrigger tidak aktif DAN CutsceneTrigger bisa digunakan untuk dialog)
+            // ATAU (Tutorial untuk mode ini sudah selesai -- artinya langsung buka toko tanpa dialog lagi, tapi popup tetap perlu)
+            bool tutorialForThisModeCompleted = (npcShopMode == Shop_UI.ShopMode.Buy && hasCompletedShopTutorialDay1Buy) ||
+                                                (npcShopMode == Shop_UI.ShopMode.Sell && hasCompletedShopTutorialDay1Sell);
+            
+            bool canShowPopup = (!isShopOpen && 
+                                 (tutorialForThisModeCompleted || 
+                                  (cutsceneTrigger != null && !cutsceneTrigger.IsCutsceneActive && cutsceneTrigger.IsUsableInternal)));
+
+            Debug.Log($"[ShopInteractable-{gameObject.name}-OnTriggerEnter] Player in range. isShopOpen: {isShopOpen}, tutorialCompleted: {tutorialForThisModeCompleted}, CT.IsCutsceneActive: {(cutsceneTrigger != null ? cutsceneTrigger.IsCutsceneActive.ToString() : "N/A")}, CT.IsUsableInternal: {(cutsceneTrigger != null ? cutsceneTrigger.IsUsableInternal.ToString() : "N/A")}. Final canShowPopup: {canShowPopup}");
+
+
+            if (canShowPopup)
             {
                 ShowInteractPopup(true);
+                // Selalu set text ke pesan interaksi awal saat masuk range dan toko belum terbuka
+                if (interactText != null)
+                {
+                    interactText.text = interactMessage;
+                }
             }
-            // else if (isShopOpen) { // Jika toko sudah terbuka, jangan tampilkan popup interaksi lagi
-            //    interactText.text = exitMessage; // Pastikan teksnya adalah 'exitMessage'
-            // }
+            else
+            {
+                ShowInteractPopup(false); // Sembunyikan jika tidak memenuhi kondisi
+            }
         }
     }
 
@@ -314,22 +361,20 @@ public class ShopInteractable : MonoBehaviour
             isPlayerInRange = false;
             ShowInteractPopup(false); // Sembunyikan popup saat pemain menjauh
 
-            // Auto-close shop dan/atau cutscene jika pemain berjalan pergi saat aktif
             if (isShopOpen)
             {
-                CloseShop(); // Menutup toko
-                // Paksa cutscene berakhir jika masih aktif saat pemain menjauh
-                if (cutsceneTrigger != null && cutsceneTrigger.IsCutsceneActive)
-                {
-                    cutsceneTrigger.EndCutscene();
-                }
+                CloseShop();
+            }
+            // Paksa cutscene berakhir jika masih aktif saat pemain menjauh
+            if (cutsceneTrigger != null && cutsceneTrigger.IsCutsceneActive)
+            {
+                cutsceneTrigger.EndCutscene();
             }
         }
     }
 
     private void SetupInteractPopup()
     {
-        // ... (kode ini tidak berubah) ...
         if (interactPopup == null)
         {
             interactPopup = new GameObject("InteractPopup");
@@ -364,12 +409,21 @@ public class ShopInteractable : MonoBehaviour
         }
     }
 
-    // --- Tambahkan metode StartCooldown() ini di sini ---
     private IEnumerator StartCooldown()
     {
         isOnCooldown = true;
         yield return new WaitForSeconds(interactionCooldown);
         isOnCooldown = false;
         Debug.Log("ShopInteractable: Cooldown ended.");
+    }
+    
+    public static void ResetAllTutorialFlags()
+    {
+        hasCompletedShopTutorialDay1Buy = false;
+        hasCompletedShopTutorialDay1Sell = false;
+        PlayerPrefs.DeleteKey("ShopTutorialDay1Buy");
+        PlayerPrefs.DeleteKey("ShopTutorialDay1Sell");
+        PlayerPrefs.Save(); // Penting: Simpan perubahan setelah menghapus
+        Debug.Log("Shop tutorial flags have been reset in PlayerPrefs and static variables.");
     }
 }

@@ -1,10 +1,10 @@
-# Blade Harvest 2045
+# Blade Farm 2045
 
 A 2D farming simulation game built in Unity where players manage crops, explore different areas, and progress through multiple days of gameplay.
 
 ## 🎮 Game Overview
 
-Blade Harvest 2045 is an immersive farming simulation where players cultivate crops, manage resources, and experience a story-driven adventure across multiple days. The game features a complete farming ecosystem with growth cycles, inventory management, and scene transitions.
+Blade Farm 2045 is an immersive farming simulation where players cultivate crops, manage resources, and experience a story-driven adventure across multiple days. The game features a complete farming ecosystem with growth cycles, inventory management, and scene transitions.
 
 ## ✨ Key Features
 
@@ -193,4 +193,4 @@ Created as a learning project to explore Unity game development, farming simulat
 
 ---
 
-_Experience the peaceful joy of farming in Blade Harvest 2045 - where every seed planted is a step toward a bountiful future!_ 🌱
+_Experience the peaceful joy of farming in Blade Farm 2045 - where every seed planted is a step toward a bountiful future!_ 🌱

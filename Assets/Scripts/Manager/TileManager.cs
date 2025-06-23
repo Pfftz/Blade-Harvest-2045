@@ -240,6 +240,12 @@ public class TileManager : MonoBehaviour
         // Get what was planted here before clearing data
         string plantType = GetPlantedSeed(position);
 
+        // Play harvest/cut sound effect
+        if (AudioManager.instance != null)
+        {
+            AudioManager.instance.PlayCut();
+        }
+
         // Spawn the appropriate crop collectable
         SpawnCropCollectable(position, plantType);
 

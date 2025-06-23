@@ -63,6 +63,12 @@ public class AudioManager : MonoBehaviour
     public void PlayCut() => PlaySound(cutSFX);
     public void PlayTalkFast() => PlaySound(talkfastSFX);
 
+    public void StopSound()
+    {
+        if (soundSource != null)
+            soundSource.Stop();
+    }
+
     private void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;

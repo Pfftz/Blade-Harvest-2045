@@ -110,6 +110,7 @@ public class CutsceneController : MonoBehaviour, ICutsceneController
             for (var i = 0; i <= text.Length; i++)
             {
                 dialogText.text = text.Substring(0, i);
+
                 yield return new WaitForSeconds(dialogTextSpeed);
             }
         }

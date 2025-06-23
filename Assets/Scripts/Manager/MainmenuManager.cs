@@ -42,17 +42,25 @@ public class MainmenuManager : MonoBehaviour
         Debug.Log($"Save file exists: {saveExists}");
         Debug.Log($"Save file path: {System.IO.Path.Combine(Application.persistentDataPath, "gamesave.json")}");
     }
-
     public void StartGame()
     {
-        // Play button click sound
-        AudioManager.instance.PlaySound(buttonClickSound);
+        // Play button click sound        AudioManager.instance.PlaySound(buttonClickSound);
 
         // Delete existing save file to start fresh
         if (SaveSystem.SaveExists())
         {
             SaveSystem.DeleteSave();
             Debug.Log("Existing save file deleted for new game");
+        }
+
+        PlayerPrefs.DeleteKey("TutorialMan_IntroShown"); //yang ini
+        ShopInteractable.ResetAllTutorialFlags();
+        Debug.Log("All tutorial dialogue flags reset for new game"); //sampe sini
+
+        // Reset SceneTransitionManager state for new game
+        if (SceneTransitionManager.Instance != null)
+        {
+            SceneTransitionManager.Instance.ResetGameState();
         }
 
         // Create new save data for day 1
@@ -94,9 +102,14 @@ public class MainmenuManager : MonoBehaviour
                 Debug.LogError("Failed to load save data - data is null!");
                 return;
             }
-
             PlayerPrefs.SetString("LoadedSaveData", JsonUtility.ToJson(saveData));
             PlayerPrefs.SetInt("IsLoadingGame", 1);
+
+            // Initialize SceneTransitionManager with loaded save data
+            if (SceneTransitionManager.Instance != null)
+            {
+                SceneTransitionManager.Instance.InitializeFromSaveData(saveData);
+            }
 
             Debug.Log($"Loading game from day {saveData.currentDay}, scene: {saveData.currentScene}");
 
@@ -170,12 +183,20 @@ public class MainmenuManager : MonoBehaviour
             EnableAllButtons();
         });
     }
-
     public void Exit()
     {
+        if (buttonClickSound != null)
+            AudioManager.instance.PlaySound(buttonClickSound);
+
+#if UNITY_EDITOR
+        // In Unity Editor, stop playing
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        // In built application, quit the application
         Application.Quit();
+#endif
     }
-    
+
     private void DisableAllButtons()
     {
         startButton.interactable = false;

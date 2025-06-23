@@ -165,7 +165,7 @@ public class CutsceneTrigger : MonoBehaviour
 
     private void SetHighlight(bool highlight)
     {
-        if (!isUsable || triggerSprite == null) return; 
+        if (!isUsable || triggerSprite == null) return;
 
         isHighlighted = highlight;
 
@@ -255,30 +255,30 @@ public class CutsceneTrigger : MonoBehaviour
 
         typingCoroutine = StartCoroutine(TypeText(text));
     }
-
     private System.Collections.IEnumerator TypeText(string text)
     {
         dialogueText.text = "";
-        Debug.Log($"CutsceneTrigger: Typing text: '{text}'");
-
+        Debug.Log($"CutsceneTrigger: Typing text: '{text}'"); int charCount = 0;
         foreach (char character in text)
         {
             dialogueText.text += character;
+
+            charCount++;
             yield return new WaitForSecondsRealtime(textSpeed);
         }
 
         isTyping = false;
-        if (continuePrompt != null) 
+        if (continuePrompt != null)
         {
             continuePrompt.SetActive(true);
-            
+
             // Add animation to continue prompt
             LeanTween.cancel(continuePrompt);
             LeanTween.scale(continuePrompt, new Vector3(1.2f, 1.2f, 1.2f), 0.5f)
                 .setEase(LeanTweenType.easeInOutSine)
                 .setLoopPingPong(-1)
                 .setIgnoreTimeScale(true);
-                
+
             Debug.Log("CutsceneTrigger: Continue prompt activated with animation");
         }
     }

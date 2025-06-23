@@ -109,9 +109,7 @@ public class GameManager : MonoBehaviour
         // Find managers in the new scene - always refresh these
         tileManager = FindObjectOfType<TileManager>();
         uiManager = FindObjectOfType<UI_Manager>();
-        player = FindObjectOfType<Player>();
-
-        // Find paused panel - look for it in the scene, including as child of HUD
+        player = FindObjectOfType<Player>();        // Find paused panel - look for it in the scene, including as child of HUD
         if (pausedPanel == null)
         {
             GameObject pausedPanelObj = GameObject.Find("PausedPanel");
@@ -151,11 +149,19 @@ public class GameManager : MonoBehaviour
             {
                 pausedPanel = pausedPanelObj;
                 Debug.Log("Paused panel found and assigned");
+
+                // Setup button references after finding the panel
+                SetupPauseMenuButtons();
             }
             else
             {
                 Debug.LogWarning("Paused panel not found in scene! Looking for 'PausedPanel', 'Paused Panel', or 'PausePanel' (also checked under HUD canvas)");
             }
+        }
+        else
+        {
+            // If panel was already assigned, make sure buttons are still connected
+            SetupPauseMenuButtons();
         }
 
         // Find movement component for pause functionality
@@ -442,12 +448,75 @@ public class GameManager : MonoBehaviour
         RefreshManagerReferences();
     }
 
+    private void SetupPauseMenuButtons()
+    {
+        if (pausedPanel == null) return;
+
+        // Find Continue button
+        UnityEngine.UI.Button continueButton = null;
+        Transform continueTransform = pausedPanel.transform.Find("Continue");
+        if (continueTransform == null)
+        {
+            continueTransform = pausedPanel.transform.Find("ContinueButton");
+            if (continueTransform == null)
+            {
+                continueTransform = pausedPanel.transform.Find("Continue Button");
+            }
+        }
+
+        if (continueTransform != null)
+        {
+            continueButton = continueTransform.GetComponent<UnityEngine.UI.Button>();
+        }
+
+        // Find Exit button
+        UnityEngine.UI.Button exitButton = null;
+        Transform exitTransform = pausedPanel.transform.Find("Exit");
+        if (exitTransform == null)
+        {
+            exitTransform = pausedPanel.transform.Find("ExitButton");
+            if (exitTransform == null)
+            {
+                exitTransform = pausedPanel.transform.Find("Exit Button");
+            }
+        }
+
+        if (exitTransform != null)
+        {
+            exitButton = exitTransform.GetComponent<UnityEngine.UI.Button>();
+        }
+
+        // Setup Continue button
+        if (continueButton != null)
+        {
+            continueButton.onClick.RemoveAllListeners();
+            continueButton.onClick.AddListener(OnClick_Continue);
+            Debug.Log("Continue button connected to GameManager");
+        }
+        else
+        {
+            Debug.LogWarning("Continue button not found in pause panel");
+        }
+
+        // Setup Exit button
+        if (exitButton != null)
+        {
+            exitButton.onClick.RemoveAllListeners();
+            exitButton.onClick.AddListener(OnClick_Exit);
+            Debug.Log("Exit button connected to GameManager");
+        }
+        else
+        {
+            Debug.LogWarning("Exit button not found in pause panel");
+        }
+    }
+
     public void OnClick_Continue()
     {
-    if (GameManager.instance != null)
-    {
-        GameManager.instance.TogglePause();
-    }
+        if (GameManager.instance != null)
+        {
+            GameManager.instance.TogglePause();
+        }
     }
 
     public void OnClick_Exit()
@@ -456,5 +525,34 @@ public class GameManager : MonoBehaviour
         {
             GameManager.instance.ReturnToMainMenu();
         }
+    }
+
+    // Static method to ensure easy access to GameManager from UI buttons
+    public static GameManager GetInstance()
+    {
+        if (instance == null)
+        {
+            instance = FindObjectOfType<GameManager>();
+        }
+        return instance;
+    }
+
+    // Alternative method names for buttons that might be looking for these specific methods
+    public void ContinueGame()
+    {
+        OnClick_Continue();
+    }
+
+    public void ExitToMainMenu()
+    {
+        OnClick_Exit();
+    }
+
+    // Public method to manually refresh pause menu button connections
+    [ContextMenu("Refresh Pause Menu Buttons")]
+    public void RefreshPauseMenuButtons()
+    {
+        SetupPauseMenuButtons();
+        Debug.Log("Pause menu buttons manually refreshed");
     }
 }

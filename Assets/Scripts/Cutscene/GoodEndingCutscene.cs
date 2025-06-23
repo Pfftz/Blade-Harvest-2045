@@ -17,7 +17,7 @@ public partial class Cutscenes
                 new DialogAction("Namun, di markas 'THE ONE', alarm berbunyi. Penjualan 'Maximum Processed Food' merosot. Sebuah toko pesaing telah muncul di Jakarta."),
                 new DialogAction("CEO 'THE ONE' menatap layar, senyum berbahaya tersungging. 'Sepertinya ada semut yang mencoba merusak pasar kita,' gumamnya dingin."),
                 new DialogAction("Perjuangan belum usai, namun Abdul kini kuat. Masa depan pangan telah berubah, dan 'real food' kembali menancapkan akarnya di 2045!"),
-                new DialogAction("Terima kasih telah bermain Blade Harvest 2045!"),
+                new DialogAction("Terima kasih telah bermain Blade Farm 2045!"),
                 new ShowDialogAction(false),
                 new WaitAction(2f)
             };
