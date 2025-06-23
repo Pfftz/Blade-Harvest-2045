@@ -45,29 +45,32 @@ public class MainmenuManager : MonoBehaviour
 
     public void StartGame()
     {
-        if (buttonClickSound != null)
-            AudioManager.instance.PlaySound(buttonClickSound);
+        // Play button click sound
+        AudioManager.instance.PlaySound(buttonClickSound);
 
+        // Delete existing save file to start fresh
         if (SaveSystem.SaveExists())
         {
             SaveSystem.DeleteSave();
             Debug.Log("Existing save file deleted for new game");
         }
 
-        GameSaveData newSaveData = new GameSaveData
-        {
-            currentDay = 1,
-            currentScene = "IntroScene",
-            saveTime = System.DateTime.Now
-        };
-
+        // Create new save data for day 1
+        GameSaveData newSaveData = new GameSaveData();
+        newSaveData.currentDay = 1;
+        newSaveData.currentScene = "IntroScene"; // Start with intro, but track Day1 as next
+        newSaveData.saveTime = System.DateTime.Now;
+        newSaveData.playerCurrency = 150;
         SaveSystem.SaveGame(newSaveData);
         Debug.Log("New save file created for new game");
 
         transitionEffectObject.SetActive(true);
         LeanTween.alpha(transitionEffect.rectTransform, 1f, 1f).setEase(LeanTweenType.easeInSine).setOnComplete(() =>
         {
+            // Load the intro scene first
             UnityEngine.SceneManagement.SceneManager.LoadScene("IntroScene");
+            // Hide the transition effect
+            transitionEffectObject.SetActive(true);
         });
     }
 
