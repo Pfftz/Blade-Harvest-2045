@@ -169,12 +169,12 @@ public class Shop_UI : MonoBehaviour
         {
             if (mode == ShopMode.Buy)
             {
-                shopTitleText.text = "Buy Items";
+                shopTitleText.text = "Joko AI";
                 InitializeShop(GameManager.instance.shopManager.ShopInventory); 
             }
             else if (mode == ShopMode.Sell)
             {
-                shopTitleText.text = "Sell Items";
+                shopTitleText.text = "My Wife";
             }
         }
     }

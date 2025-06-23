@@ -70,7 +70,7 @@ public class ShopInteractable : MonoBehaviour
         }
 
         // Idealnya, muat status tutorial dari save game
-        // (Ini hanya contoh, perlu sistem save game yang sebenarnya)
+        // (Ini hanya contoh untuk test)
         //PlayerPrefs.DeleteKey("ShopTutorialDay1Buy"); // Untuk testing
         //PlayerPrefs.DeleteKey("ShopTutorialDay1Sell"); // Untuk testing
         hasCompletedShopTutorialDay1Buy = PlayerPrefs.GetInt("ShopTutorialDay1Buy", 0) == 1;
