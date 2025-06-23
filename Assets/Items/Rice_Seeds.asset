@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemName: RiceSeed
   icon: {fileID: 1209158105, guid: a2388587df97614459a0e44f024b4110, type: 3}
-  description: Benih padi, dasar makanan pokok dunia (beras). Ideal untuk sawa
-  buyPrice: 10
+  description: untuk ditanam dan menghasilkan beras
+  buyPrice: 12
   canBuy: 1
   canSell: 1
   category: 0

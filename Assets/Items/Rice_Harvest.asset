@@ -15,7 +15,7 @@ MonoBehaviour:
   itemName: Rice
   icon: {fileID: 1630670650, guid: a2388587df97614459a0e44f024b4110, type: 3}
   description: Beras Kualitas tinggi yang dihasilkan dari penanaman yang baik
-  buyPrice: 10
+  buyPrice: 26
   canBuy: 1
   canSell: 1
   category: 1

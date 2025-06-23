@@ -2326,8 +2326,26 @@ MonoBehaviour:
   sleepTransitionVideo: {fileID: 32900000, guid: c335a3a3c47e7f14b9049e3f99f16bdc, type: 3}
   sleepAnimationSprites: []
   spriteAnimationSpeed: 0.2
-  restaurantTransitionVideo: {fileID: 32900000, guid: 8c0ad0dfc8c2f6c4dbd88b24c245019f, type: 3}
-  restaurantAnimationSprites: []
+  restaurantTransitionVideo: {fileID: 0}
+  restaurantAnimationSprites:
+  - {fileID: -1476961046, guid: c56d440491670924fbe5f001d06f9d08, type: 3}
+  - {fileID: -1441133772, guid: c56d440491670924fbe5f001d06f9d08, type: 3}
+  - {fileID: -596351893, guid: c56d440491670924fbe5f001d06f9d08, type: 3}
+  - {fileID: -1652244047, guid: c56d440491670924fbe5f001d06f9d08, type: 3}
+  - {fileID: -850683272, guid: c56d440491670924fbe5f001d06f9d08, type: 3}
+  - {fileID: 166633297, guid: c56d440491670924fbe5f001d06f9d08, type: 3}
+  - {fileID: -1114548727, guid: c56d440491670924fbe5f001d06f9d08, type: 3}
+  - {fileID: -1393001429, guid: c56d440491670924fbe5f001d06f9d08, type: 3}
+  - {fileID: 207100571, guid: c56d440491670924fbe5f001d06f9d08, type: 3}
+  - {fileID: -1070307480, guid: c56d440491670924fbe5f001d06f9d08, type: 3}
+  - {fileID: 1634841399, guid: c56d440491670924fbe5f001d06f9d08, type: 3}
+  - {fileID: 828572744, guid: c56d440491670924fbe5f001d06f9d08, type: 3}
+  - {fileID: 902162464, guid: c56d440491670924fbe5f001d06f9d08, type: 3}
+  - {fileID: 1092366323, guid: c56d440491670924fbe5f001d06f9d08, type: 3}
+  - {fileID: -617509116, guid: c56d440491670924fbe5f001d06f9d08, type: 3}
+  - {fileID: -1934665389, guid: c56d440491670924fbe5f001d06f9d08, type: 3}
+  - {fileID: 151262667, guid: c56d440491670924fbe5f001d06f9d08, type: 3}
+  - {fileID: -1332852575, guid: c56d440491670924fbe5f001d06f9d08, type: 3}
   currentDay: 1
   maxDays: 7
 --- !u!4 &340013318
@@ -3399,7 +3417,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: addb47d81b19b874baf3c849abc72d72, type: 2}
   - {fileID: 11400000, guid: 796a3b2509a8a294c8429f066bfbdadd, type: 2}
   shopUI: {fileID: 857083353}
-  sellValueMultiplier: 0.75
+  sellValueMultiplier: 1
 --- !u!114 &482948593
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3449,8 +3467,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 50}
+  m_AnchoredPosition: {x: 2.3955078, y: -13.5}
+  m_SizeDelta: {x: -129.3562, y: 77}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &510463845
 MonoBehaviour:
@@ -3499,10 +3517,10 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 44.75
-  m_fontSizeBase: 36
+  m_fontSize: 26
+  m_fontSizeBase: 26
   m_fontWeight: 400
-  m_enableAutoSizing: 1
+  m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
@@ -3778,6 +3796,83 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 1325979515}
+--- !u!1 &543942398
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 543942399}
+  - component: {fileID: 543942401}
+  - component: {fileID: 543942400}
+  m_Layer: 5
+  m_Name: boder
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &543942399
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 543942398}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1386370725}
+  m_Father: {fileID: 1100965420}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -1.6756, y: 0.00081635}
+  m_SizeDelta: {x: 451.87, y: 467.95}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &543942400
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 543942398}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0.14901961, g: 0.101960786, b: 0.29411766, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &543942401
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 543942398}
+  m_CullTransparentMesh: 1
 --- !u!1001 &561283438
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4345,8 +4440,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 4294967040
+  m_fontColor: {r: 0, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -4441,19 +4536,22 @@ MonoBehaviour:
   interactionKey: 101
   interactMessage: Press E to Open Shop
   exitMessage: Press E to Close Shop
+  interactionCooldown: 0.5
   interactPopup: {fileID: 746985171}
   interactText: {fileID: 470511729}
   shopUI: {fileID: 857083353}
   npcShopMode: 0
   cutsceneTrigger: {fileID: 591467428}
   dialogueLinesDay1:
-  - hoi hoi hoi
-  - dungu
-  - ngawur cik
-  speakerNameDay1: Joko
+  - halo tuan...
+  - Namaku Joko, Aku adalah robot yang menyediakan benih untuk kau beli
+  - karena produk yang langka harganya menjadi cukup mahal
+  - tapi tenang untukmu aku akan memberi harga murah
+  - Silahkan dilihat lihat terlebih dahulu
+  speakerNameDay1: AI penghubung ke black market
   dialogueLinesRepeat:
-  - Hai hai hai
-  speakerNameRepeat: Joko
+  - Apa yang kamu butuhkan?
+  speakerNameRepeat: Joko AI
 --- !u!212 &591467424
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -6931,8 +7029,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -251, y: 64}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: 16.3575, y: 81}
+  m_SizeDelta: {x: 869.7229, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &812112204
 MonoBehaviour:
@@ -6981,13 +7079,13 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 44.75
-  m_fontSizeBase: 36
+  m_fontSize: 30
+  m_fontSizeBase: 30
   m_fontWeight: 400
-  m_enableAutoSizing: 1
+  m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 1
   m_VerticalAlignment: 256
   m_textAlignment: 65535
@@ -7843,7 +7941,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -41, y: 82}
+  m_AnchoredPosition: {x: -40.99994, y: 82}
   m_SizeDelta: {x: 0, y: 164}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1049594679
@@ -8323,6 +8421,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1100965420}
   - component: {fileID: 1100965421}
+  - component: {fileID: 1100965423}
+  - component: {fileID: 1100965422}
   m_Layer: 5
   m_Name: SellSection
   m_TagString: Untagged
@@ -8342,7 +8442,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1386370725}
+  - {fileID: 543942399}
   m_Father: {fileID: 857083352}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -8364,11 +8464,49 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   backgroundImage: {fileID: 1386370726}
-  normalColor: {r: 0.8, g: 0.8, b: 0.8, a: 0.5}
-  highlightColor: {r: 1, g: 0.92, b: 0.016, a: 0.7}
+  normalColor: {r: 0.33333334, g: 0.16862746, b: 0.38431373, a: 0.5}
+  highlightColor: {r: 1, g: 0.84313726, b: 0, a: 0.7}
   dropHereText: {fileID: 0}
   pulseSpeed: 1
   pulseAmount: 0.1
+--- !u!114 &1100965422
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1100965419}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1100965423
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1100965419}
+  m_CullTransparentMesh: 1
 --- !u!1001 &1136818068
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -12154,7 +12292,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1325979512}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e8338fcdc6863e24a91ff9d99d86f2e0, type: 3}
   m_Name: 
@@ -12383,19 +12521,19 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1386370724}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 578946783}
-  m_Father: {fileID: 1100965420}
+  m_Father: {fileID: 543942399}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 3.2450018, y: 0.000030518}
-  m_SizeDelta: {x: 476.48, y: 492.56}
+  m_AnchoredPosition: {x: -0.0009018183, y: -0.00079345703}
+  m_SizeDelta: {x: 451.8729, y: 467.9528}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1386370726
 MonoBehaviour:
@@ -12410,7 +12548,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 0, b: 0, a: 1}
+  m_Color: {r: 0.15029354, g: 0.10070309, b: 0.2924528, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -20175,7 +20313,7 @@ GameObject:
   - component: {fileID: 2093552167}
   - component: {fileID: 2093552168}
   m_Layer: 0
-  m_Name: JokowiNPC
+  m_Name: TutorialNPC
   m_TagString: CutsceneTrigger
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -20312,21 +20450,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47e5c2e23a6fede48a8d2eb8126e623e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speakerName: NPC
+  speakerName: Budi AI
   introDialogueLines:
-  - kontol nian
-  - mbud
+  - Halo tuan abdul
+  - Saya adalah roh nenek moyangmu
+  - Saya akan membantu memberi penjelasan tentang cara berkebun
+  - untuk pertama mulailah membeli bibit di pria berambut oren
+  - lalu gunakan cangkul untuk menanam bibit
+  - dan gunakan sentermu untuk mempercepat pertumbuhan tanamanmu
+  - Terakhir berikanlah hasil panenmu kepada istrimu
+  - Semangat dalam mencari uang ^-^
   farmingTips:
-  - 'gunakan senter untuk '
-  - test 2
+  - Gunakan senter untuk mempercepat pertumbuhan tanaman
+  - Gunakan shovel untuk menutup kembali tanah yang sudah di cangkul
+  - Gunakan keris untuk mengambil hasil tanamanmu
+  - Gunakan cangkul untuk menggemburkan tanah
   combatTips:
-  - test 3
-  - test 4
+  - Beli bibit di merchant dan mulailah menanam
+  - Berikan bahan baku makanan pada istrimu untuk dijual
   generalTips:
-  - test 5
-  - test 6
+  - Tidur dapat memulihkan energimu hingga maksimum
+  - Carilah uang sebanyak-banyaknya
   showRandomTipsAfterIntro: 1
   interactionKey: 101
+  interactionCooldown: 0.5
 --- !u!1 &2094269426
 GameObject:
   m_ObjectHideFlags: 0
@@ -20511,19 +20658,21 @@ MonoBehaviour:
   interactionKey: 101
   interactMessage: Press E to Open Shop
   exitMessage: Press E to Close Shop
+  interactionCooldown: 0.5
   interactPopup: {fileID: 938738500}
   interactText: {fileID: 685275689}
   shopUI: {fileID: 857083353}
   npcShopMode: 1
   cutsceneTrigger: {fileID: 2106763217}
   dialogueLinesDay1:
-  - bls bla bla
-  - bli bli bli
-  - blu blu blu
-  speakerNameDay1: Waifu binti wife
+  - Haiii
+  - Bagaimana kabarmu?
+  - Apakah kamu sudah mulai berkebun?
+  - jika sudah dapat dipanen berikan kepadaku aku akan mulai mengolahnya
+  speakerNameDay1: The most beautiful person in the world
   dialogueLinesRepeat:
-  - hayoyoyo
-  speakerNameRepeat: Waifu binti wife
+  - Hai hai hai, kemarilah
+  speakerNameRepeat: My Wife
 --- !u!212 &2106763214
 SpriteRenderer:
   m_ObjectHideFlags: 0

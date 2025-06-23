@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemName: CabbageSeed
   icon: {fileID: -1877549558, guid: d9cbb935a784abc4da74243927f08227, type: 3}
-  description: Benih kubis, menghasilkan kepala kubis padat dan kaya nutrisi.
-  buyPrice: 10
+  description: untuk ditanam dan menghasilkan kubis
+  buyPrice: 5
   canBuy: 1
   canSell: 1
   category: 0

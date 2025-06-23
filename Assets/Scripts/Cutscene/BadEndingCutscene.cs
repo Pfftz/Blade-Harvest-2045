@@ -11,14 +11,16 @@ public partial class Cutscenes
         {
             return new Cutscene() {
                 new ShowDialogAction(true),
-                new DialogAction("Your farming venture has come to an end..."),
-                new DialogAction("Unfortunately, you didn't reach the goal of 1000 currency."),
-                new DialogAction("The colony's food supply remains uncertain."),
-                new DialogAction("But don't give up - every farmer faces challenges."),
-                new DialogAction("Perhaps with better planning and resource management, you could succeed next time."),
-                new DialogAction("The cyberpunk world is harsh, but there's always another opportunity."),
-                new DialogAction("Consider this a learning experience for your next farming venture."),
-                new DialogAction("Thank you for playing Blade Harvest 2045!"),
+                new DialogAction("Perjalananmu di Blade Harvest 2045 sudah selesai... dengan kesedihan."),
+                new DialogAction("Apartemen Abdul kini sepi sekali. Tanaman-tanaman yang dulu ditanam penuh harapan, sekarang layu dan mati satu per satu."),
+                new DialogAction("Hutang 1000 kredit ke Bank Riba Ilegal itu tidak bisa dibayar. Waktu habis, dan harapan pun ikut hilang."),
+                new DialogAction("Usaha 'real food' mereka tidak berhasil. Orang-orang sudah terbiasa dengan makanan buatan yang tidak ada rasanya."),
+                new DialogAction("'THE ONE' masih sangat berkuasa. Gedung-gedung tinggi mereka seperti mengejek, menunjukkan bahwa mereka tidak bisa dikalahkan."),
+                new DialogAction("Di tengah kota futuristik yang ramai, Abdul dan istrinya kembali menjalani hidup yang suram."),
+                new DialogAction("Mereka makan 'Maximum Processed Food' yang hambar. Tanpa selera, tanpa semangat. Mimpi 'real food' sekarang hanya jadi bisikan sedih di malam hari."),
+                new DialogAction("Hati mereka rasanya hancur. Bukan cuma impian yang mati, tapi semangat untuk berjuang juga hilang."),
+                new DialogAction("Terkadang, kegagalan bukan hanya mengakhiri sebuah usaha, tapi juga menghancurkan jiwa."),
+                new DialogAction("Terima kasih sudah bermain Blade Harvest 2045. Semoga kamu menemukan kebahagiaan di tempat lain."),
                 new ShowDialogAction(false),
                 new WaitAction(2f)
             };

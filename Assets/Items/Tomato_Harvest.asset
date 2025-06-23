@@ -15,7 +15,7 @@ MonoBehaviour:
   itemName: Tomato
   icon: {fileID: -1753425133, guid: f0ecac6f9d799e247adca53b4c0e81ef, type: 3}
   description: Tomat segar baru dipanen dari kebun
-  buyPrice: 10
+  buyPrice: 30
   canBuy: 1
   canSell: 1
   category: 1

@@ -35,7 +35,7 @@ public class Tutorial_Man : MonoBehaviour
     private void Start()
     {
         // FOR TESTING
-        // PlayerPrefs.DeleteKey("TutorialMan_IntroShown"); // Komen atau hapus ini untuk build final
+        //PlayerPrefs.DeleteKey("TutorialMan_IntroShown"); // Komen atau hapus ini untuk build final
 
         // Check if we've shown the intro dialogue before
         hasShownIntroDialogue = PlayerPrefs.GetInt("TutorialMan_IntroShown", 0) == 1;

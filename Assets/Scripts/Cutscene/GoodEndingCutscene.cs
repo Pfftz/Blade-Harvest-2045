@@ -11,14 +11,13 @@ public partial class Cutscenes
         {
             return new Cutscene() {
                 new ShowDialogAction(true),
-                new DialogAction("Congratulations, farmer!"),
-                new DialogAction("You have successfully reached your goal of 1000 currency."),
-                new DialogAction("Your hard work and dedication have paid off in this cyberpunk world."),
-                new DialogAction("The colony's food supply is secure thanks to your efforts."),
-                new DialogAction("You've proven that even in 2045, traditional farming combined with technology can thrive."),
-                new DialogAction("The future looks bright for agriculture on this remote colony."),
-                new DialogAction("Your name will be remembered as one of the great farmers of the new age."),
-                new DialogAction("Thank you for playing Blade Harvest 2045!"),
+                new DialogAction("Selamat!!! Kamu telah mencapai akhir yang baik!"),
+                new DialogAction("Apartemen Abdul kini subur, penuh tanaman segar. Bersama istrinya, mereka tersenyum lega karena hutang 1000 kredit lunas!"),
+                new DialogAction("Toko mereka meledak laris. Antrean pembeli mengular, haus akan rasa yang otentik. Abdul telah sukses besar!"),
+                new DialogAction("Namun, di markas 'THE ONE', alarm berbunyi. Penjualan 'Maximum Processed Food' merosot. Sebuah toko pesaing telah muncul di Jakarta."),
+                new DialogAction("CEO 'THE ONE' menatap layar, senyum berbahaya tersungging. 'Sepertinya ada semut yang mencoba merusak pasar kita,' gumamnya dingin."),
+                new DialogAction("Perjuangan belum usai, namun Abdul kini kuat. Masa depan pangan telah berubah, dan 'real food' kembali menancapkan akarnya di 2045!"),
+                new DialogAction("Terima kasih telah bermain Blade Harvest 2045!"),
                 new ShowDialogAction(false),
                 new WaitAction(2f)
             };

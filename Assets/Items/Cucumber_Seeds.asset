@@ -14,9 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemName: CucumberSeed
   icon: {fileID: 1820502810, guid: 35a6c1c4b400f804a917d46879b10b1a, type: 3}
-  description: Benih mentimun, tumbuh jadi buah renyah dan menyegarkan. Sempurna
-    untuk salad.
-  buyPrice: 10
+  description: untuk ditanam dan menghasilkan mentimun
+  buyPrice: 8
   canBuy: 1
   canSell: 1
   category: 0
