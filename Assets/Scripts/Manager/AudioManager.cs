@@ -33,28 +33,8 @@ public class AudioManager : MonoBehaviour
         {
             Destroy(gameObject);
             return;
-        }
-
-        // Get or Add AudioSource
-        AudioSource[] sources = GetComponents<AudioSource>();
-        if (sources.Length < 2)
-        {
-            soundSource = gameObject.AddComponent<AudioSource>();
-            musicSource = gameObject.AddComponent<AudioSource>();
-        }
-        else
-        {
-            soundSource = sources[0];
-            musicSource = sources[1];
-        }
-
-        musicSource.loop = true;
-
-        // Load volume settings
-        float musicVol = PlayerPrefs.GetFloat("musicVolume", 0.5f);
-        float soundVol = PlayerPrefs.GetFloat("soundVolume", 0.5f);
-        ChangeMusicVolume(musicVol);
-        ChangeSoundVolume(soundVol);
+        }        // Get or Add AudioSource
+        SetupAudioSources();
     }
 
 
@@ -78,9 +58,22 @@ public class AudioManager : MonoBehaviour
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
-
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        // Ensure AudioManager is still active after scene loads
+        if (!gameObject.activeInHierarchy)
+        {
+            gameObject.SetActive(true);
+            Debug.Log("AudioManager reactivated after scene load");
+        }
+
+        // Validate audio sources still exist
+        if (soundSource == null || musicSource == null)
+        {
+            Debug.LogWarning("Audio sources lost during scene transition, recreating...");
+            SetupAudioSources();
+        }
+
         // Cek apakah sudah memainkan musik yang sesuai, hindari tumpang tindih
         if ((scene.name == "IntroScene" || scene.name == "BadEnding" || scene.name == "GoodEnding") && musicSource.clip != introBGM)
         {
@@ -92,20 +85,74 @@ public class AudioManager : MonoBehaviour
         }
     }
 
+    private void SetupAudioSources()
+    {
+        // Get or Add AudioSource
+        AudioSource[] sources = GetComponents<AudioSource>();
+        if (sources.Length < 2)
+        {
+            // Create new audio sources if missing
+            if (soundSource == null)
+                soundSource = gameObject.AddComponent<AudioSource>();
+            if (musicSource == null)
+                musicSource = gameObject.AddComponent<AudioSource>();
+        }
+        else
+        {
+            soundSource = sources[0];
+            musicSource = sources[1];
+        }
+
+        musicSource.loop = true;
+
+        // Restore volume settings
+        float musicVol = PlayerPrefs.GetFloat("musicVolume", 0.5f);
+        float soundVol = PlayerPrefs.GetFloat("soundVolume", 0.5f);
+        ChangeMusicVolume(musicVol);
+        ChangeSoundVolume(soundVol);
+    }
+
     // Main methods
     public void PlaySound(AudioClip clip)
     {
-        if (clip != null)
-            soundSource.PlayOneShot(clip);
+        if (clip == null)
+        {
+            Debug.LogWarning("AudioManager: Attempted to play null sound clip");
+            return;
+        }
+
+        // Ensure sound source exists
+        if (soundSource == null)
+        {
+            Debug.LogWarning("AudioManager: Sound source is null, recreating...");
+            SetupAudioSources();
+        }
+
+        soundSource.PlayOneShot(clip);
     }
 
     public void PlayMusic(AudioClip music, bool loop = true)
     {
-        if (music == null) return;
+        if (music == null)
+        {
+            Debug.LogWarning("AudioManager: Attempted to play null music clip");
+            return;
+        }
+
+        // Ensure music source exists
+        if (musicSource == null)
+        {
+            Debug.LogWarning("AudioManager: Music source is null, recreating...");
+            SetupAudioSources();
+        }
 
         if (musicSource.clip == music && musicSource.isPlaying)
+        {
+            Debug.Log($"AudioManager: {music.name} is already playing");
             return;
+        }
 
+        Debug.Log($"AudioManager: Playing music: {music.name}");
         musicSource.Stop();
         musicSource.clip = music;
         musicSource.loop = loop;
@@ -142,4 +189,31 @@ public class AudioManager : MonoBehaviour
 
     public float GetMusicVolume() => musicSource.volume;
     public float GetSoundVolume() => soundSource.volume;
+
+    /// <summary>
+    /// Validate that AudioManager is properly set up and functional
+    /// Call this method if audio seems to stop working
+    /// </summary>
+    public void ValidateAudioManager()
+    {
+        if (!gameObject.activeInHierarchy)
+        {
+            Debug.LogWarning("AudioManager GameObject was inactive! Reactivating...");
+            gameObject.SetActive(true);
+        }
+
+        if (soundSource == null || musicSource == null)
+        {
+            Debug.LogWarning("Audio sources are null! Recreating...");
+            SetupAudioSources();
+        }
+
+        if (!musicSource.isPlaying && mainBGM != null)
+        {
+            Debug.Log("Music stopped playing, restarting main BGM...");
+            PlayMusic(mainBGM, true);
+        }
+
+        Debug.Log($"AudioManager validation complete - Active: {gameObject.activeInHierarchy}, SoundSource: {soundSource != null}, MusicSource: {musicSource != null}, Music Playing: {musicSource?.isPlaying}");
+    }
 }

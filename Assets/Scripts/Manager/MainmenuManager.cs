@@ -19,7 +19,6 @@ public class MainmenuManager : MonoBehaviour
 
     [Header("UI Elements - Credits")]
     [SerializeField] GameObject creditsPanel;
-    [SerializeField] Button closeCreditsButton;
 
     [Header("UI Elements - Transition Effect")]
     [SerializeField] Image transitionEffect;
@@ -29,22 +28,29 @@ public class MainmenuManager : MonoBehaviour
     [SerializeField] AudioClip bgmSong;
     [SerializeField] AudioClip buttonClickSound;
     [SerializeField] AudioClip buttonCloseSFX;
-
+    // Start is called before the first frame update
     void Start()
     {
-        if (bgmSong != null)
-            AudioManager.instance.PlayMusic(bgmSong, true);
+        AudioManager.instance.PlayMusic(bgmSong, true);
 
-        // Aktifkan tombol "Load" hanya jika ada save file
+        // Check if save file exists and enable/disable load button accordingly
         bool saveExists = SaveSystem.SaveExists();
         loadButton.interactable = saveExists;
 
         Debug.Log($"Save file exists: {saveExists}");
         Debug.Log($"Save file path: {System.IO.Path.Combine(Application.persistentDataPath, "gamesave.json")}");
     }
+
+    // Update is called once per frame
+    void Update()
+    {
+
+    }
+
     public void StartGame()
     {
-        // Play button click sound        AudioManager.instance.PlaySound(buttonClickSound);
+        // Play button click sound
+        AudioManager.instance.PlaySound(buttonClickSound);
 
         // Delete existing save file to start fresh
         if (SaveSystem.SaveExists())
@@ -53,15 +59,9 @@ public class MainmenuManager : MonoBehaviour
             Debug.Log("Existing save file deleted for new game");
         }
 
-        PlayerPrefs.DeleteKey("TutorialMan_IntroShown"); //yang ini
+        PlayerPrefs.DeleteKey("TutorialMan_IntroShown");
         ShopInteractable.ResetAllTutorialFlags();
-        Debug.Log("All tutorial dialogue flags reset for new game"); //sampe sini
-
-        // Reset SceneTransitionManager state for new game
-        if (SceneTransitionManager.Instance != null)
-        {
-            SceneTransitionManager.Instance.ResetGameState();
-        }
+        Debug.Log("All tutorial dialogue flags reset for new game");
 
         // Create new save data for day 1
         GameSaveData newSaveData = new GameSaveData();
@@ -84,9 +84,10 @@ public class MainmenuManager : MonoBehaviour
 
     public void LoadGame()
     {
-        if (buttonClickSound != null)
-            AudioManager.instance.PlaySound(buttonClickSound);
+        // Play button click sound
+        AudioManager.instance.PlaySound(buttonClickSound);
 
+        // Check if save file exists
         if (!SaveSystem.SaveExists())
         {
             Debug.LogError("No save file found to load!");
@@ -95,6 +96,7 @@ public class MainmenuManager : MonoBehaviour
 
         try
         {
+            // Load the saved game data
             GameSaveData saveData = SaveSystem.LoadGame();
 
             if (saveData == null)
@@ -102,22 +104,20 @@ public class MainmenuManager : MonoBehaviour
                 Debug.LogError("Failed to load save data - data is null!");
                 return;
             }
+
+            // Store the loaded data in a persistent way (using PlayerPrefs temporarily)
             PlayerPrefs.SetString("LoadedSaveData", JsonUtility.ToJson(saveData));
             PlayerPrefs.SetInt("IsLoadingGame", 1);
-
-            // Initialize SceneTransitionManager with loaded save data
-            if (SceneTransitionManager.Instance != null)
-            {
-                SceneTransitionManager.Instance.InitializeFromSaveData(saveData);
-            }
 
             Debug.Log($"Loading game from day {saveData.currentDay}, scene: {saveData.currentScene}");
 
             transitionEffectObject.SetActive(true);
             LeanTween.alpha(transitionEffect.rectTransform, 1f, 1f).setEase(LeanTweenType.easeInSine).setOnComplete(() =>
-            {
+            {            // Load the scene where the player last saved
                 string sceneToLoad = !string.IsNullOrEmpty(saveData.currentScene) ? saveData.currentScene : "IntroScene";
+                Debug.Log($"Loading scene: {sceneToLoad}");
                 UnityEngine.SceneManagement.SceneManager.LoadScene(sceneToLoad);
+                transitionEffectObject.SetActive(true);
             });
         }
         catch (System.Exception e)
@@ -128,90 +128,59 @@ public class MainmenuManager : MonoBehaviour
 
     public void Setting()
     {
-        DisableAllButtons();
-        settingPanel.SetActive(true);
-        settingPanel.transform.localScale = Vector3.zero;
-
-        if (buttonClickSound != null)
-            AudioManager.instance.PlaySound(buttonClickSound);
-
-        LeanTween.scale(settingPanel, Vector3.one, 1f).setEase(LeanTweenType.easeOutSine).setOnComplete(() =>
-        {
-            closeSettingButton.interactable = true;
-        });
-    }
-
-    public void CloseSetting()
-    {
-        if (buttonCloseSFX != null)
-            AudioManager.instance.PlaySound(buttonCloseSFX);
-
-        LeanTween.scale(settingPanel, Vector3.zero, 1f).setEase(LeanTweenType.easeOutSine).setOnComplete(() =>
-        {
-            settingPanel.SetActive(false);
-            EnableAllButtons();
-        });
-    }
-
-    public void Credits()
-    {
-        DisableAllButtons();
-        creditsPanel.SetActive(true);
-        creditsPanel.transform.localScale = Vector3.zero;
-
-        if (buttonClickSound != null)
-            AudioManager.instance.PlaySound(buttonClickSound);
-
-        LeanTween.scale(creditsPanel, Vector3.one, 1f).setEase(LeanTweenType.easeOutSine).setOnComplete(() =>
-        {
-            closeCreditsButton.interactable = true;
-        });
-
-        var scrollScript = creditsPanel.GetComponentInChildren<AutoScrollCredits>();
-        scrollScript.enabled = false;
-        scrollScript.enabled = true;
-    }
-
-    public void CloseCredits()
-    {
-        if (buttonCloseSFX != null)
-            AudioManager.instance.PlaySound(buttonCloseSFX);
-
-        LeanTween.scale(creditsPanel, Vector3.zero, 1f).setEase(LeanTweenType.easeOutSine).setOnComplete(() =>
-        {
-            creditsPanel.SetActive(false);
-            EnableAllButtons();
-        });
-    }
-    public void Exit()
-    {
-        if (buttonClickSound != null)
-            AudioManager.instance.PlaySound(buttonClickSound);
-
-#if UNITY_EDITOR
-        // In Unity Editor, stop playing
-        UnityEditor.EditorApplication.isPlaying = false;
-#else
-        // In built application, quit the application
-        Application.Quit();
-#endif
-    }
-
-    private void DisableAllButtons()
-    {
+        // Button Checking
         startButton.interactable = false;
         loadButton.interactable = false;
         settingButton.interactable = false;
         creditsButton.interactable = false;
         exitButton.interactable = false;
+        closeSettingButton.interactable = false;
+        settingPanel.SetActive(true);
+
+        // Play button click sound
+        AudioManager.instance.PlaySound(buttonClickSound);
+
+        // Tweening atau Animation untuk membuka panel setting
+        LeanTween.scale(settingPanel, new Vector3(0.49615f, 0.49615f, 0.49615f), 1f).setEase(LeanTweenType.easeOutSine).setOnComplete(() =>
+        {
+            // Open the settings panel with a scale animation
+            closeSettingButton.interactable = true;
+        });
+
     }
 
-    private void EnableAllButtons()
+    public void CloseSetting()
     {
-        startButton.interactable = true;
-        loadButton.interactable = true;
-        settingButton.interactable = true;
-        creditsButton.interactable = true;
-        exitButton.interactable = true;
+        AudioManager.instance.PlaySound(buttonCloseSFX);
+        // Close the settings panel        
+        LeanTween.scale(settingPanel, new Vector3(0f, 0f, 0f), 1f).setEase(LeanTweenType.easeOutSine).setOnComplete(() =>
+        {
+            // Open the settings panel with a scale animation
+            settingPanel.SetActive(false);
+
+            // Button Checking
+            startButton.interactable = true;
+            loadButton.interactable = true;
+            settingButton.interactable = true;
+            creditsButton.interactable = true;
+            exitButton.interactable = true;
+        });
+    }
+
+    public void Credits()
+    {
+
+    }
+
+    public void CloseCredits()
+    {
+        // Close the credits panel
+        creditsPanel.SetActive(false);
+    }
+
+    public void Exit()
+    {
+        // Exit Game
+        Application.Quit();
     }
 }
